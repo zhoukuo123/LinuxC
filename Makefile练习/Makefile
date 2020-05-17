@@ -37,7 +37,7 @@
 
 CPPFLAGS = -Iinclude
 CFLAGS = -g -Wall
-LDFLAGS =
+LDFLAGS = -lpthread
 CC = gcc
 
 src = $(wildcard *.c)
