@@ -46,5 +46,5 @@ int main() {
     pthread_join(tid1, NULL);
     pthread_join(tid2, NULL);
     pthread_mutex_destroy(&mutex2);
-    return NULL;
+    return 1;
 }
