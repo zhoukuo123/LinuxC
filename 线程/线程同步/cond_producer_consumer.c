@@ -5,6 +5,8 @@
 #include <pthread.h>
 #include <errno.h>
 
+#define CAPACITY 10
+
 void err_thread(int ret, char *str) {
     if (ret != 0) {
         fprintf(stderr, "%s:%s\n", str, strerror(ret));
@@ -18,21 +20,32 @@ struct msg {
 };
 
 struct msg *head;
+int size;
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t has_data = PTHREAD_COND_INITIALIZER;
 
 void *producer(void *arg) {
-    struct msg *mp;
+    struct msg *mp = (struct msg *)malloc(sizeof(struct msg));
     int n = 10;
     while (n--) {
-        mp  = malloc(sizeof(struct msg));
         mp->num = rand() % 1000 + 1;
-        printf("--produce %d\n", mp->num);
+
+        while (size >= CAPACITY) { // 缓冲区满了
+            printf("size >= CAPACITY缓冲区满了\n");
+            sleep(rand() % 3);
+        }
+
         pthread_mutex_lock(&mutex);
+
         mp->next = head;
         head = mp;
+
+        size++;
+
         pthread_mutex_unlock(&mutex);
+
+        printf("--produce id =%lu produce %d size=%d\n", pthread_self(), mp->num, size);
 
         pthread_cond_signal(&has_data); // 将阻塞在该条件变量上的一个线程唤醒
         sleep(rand() % 3);
@@ -51,8 +64,10 @@ void *consumer(void *arg) {
 
         mp = head;
         head = mp->next;
+        size--;
         pthread_mutex_unlock(&mutex);
-        printf("--consume %d\n", mp->num);
+
+        printf("--consume %d size=%d\n", mp->num, size);
         free(mp);
         sleep(rand() % 3);
     }
@@ -68,6 +83,32 @@ int main() {
     if (ret != 0) {
         err_thread(ret, "pthread_create producer error");
     }
+    ret = pthread_create(&pid, NULL, producer, NULL);
+    if (ret != 0) {
+        err_thread(ret, "pthread_create producer error");
+    }
+    ret = pthread_create(&pid, NULL, producer, NULL);
+    if (ret != 0) {
+        err_thread(ret, "pthread_create producer error");
+    }
+    ret = pthread_create(&pid, NULL, producer, NULL);
+    if (ret != 0) {
+        err_thread(ret, "pthread_create producer error");
+    }
+    ret = pthread_create(&pid, NULL, producer, NULL);
+    if (ret != 0) {
+        err_thread(ret, "pthread_create producer error");
+    }
+    ret = pthread_create(&pid, NULL, producer, NULL);
+    if (ret != 0) {
+        err_thread(ret, "pthread_create producer error");
+    }
+    ret = pthread_create(&pid, NULL, producer, NULL);
+    if (ret != 0) {
+        err_thread(ret, "pthread_create producer error");
+    }
+
+
     ret = pthread_create(&cid, NULL, consumer, NULL);
     if (ret != 0) {
         err_thread(ret, "pthread_create consumer error");
