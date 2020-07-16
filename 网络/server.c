@@ -8,6 +8,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <ctype.h>
+#include <arpa/inet.h>
 
 #define  SERV_PORT 9527
 
@@ -50,9 +51,19 @@ int main(int argc, char *argv[]) {
     // 返回新的文件描述符, 是用来通信的
     if (cfd == -1) {
         sys_err("accept", __LINE__);
+    } else {
+        char *tmp = "连接建立成功!\n";
+        printf("%s", tmp);
+
+        char client_IP[1024];
+        printf("client ip:%s port:%d\n",
+                inet_ntop(AF_INET, &clit_addr.sin_addr.s_addr, client_IP, sizeof(client_IP)),
+                ntohs(clit_addr.sin_port));
+
+        write(cfd, tmp, strlen(tmp));
     }
 
-    char buf[BUFSIZ]; // BUFSIZ 4096
+    char buf[BUFSIZ]; // BUFSIZ 8192
 
     while (1) {
         result = read(cfd, buf, sizeof(buf)); // 返回实际读到的字节数
