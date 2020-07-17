@@ -13,7 +13,8 @@
 
 #define MAXLENGTH 1024
 #define IP "localhost"
-#define PASSWORD "0000"
+#define USERNAME "root"
+#define PASSWORD "zhoukuo"
 
 MYSQL mysql;
 MYSQL_RES *result;
