@@ -20,7 +20,7 @@ void *producer(void *arg) {
         printf("produce--%d\n", queue[i]);
         sem_post(&product_number);
 
-        i = (i+1) % NUM;
+        i = (i + 1) % NUM;
         sleep(rand() % 1);
     }
     return NULL;

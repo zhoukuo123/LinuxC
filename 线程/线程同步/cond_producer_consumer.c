@@ -26,7 +26,7 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t has_data = PTHREAD_COND_INITIALIZER;
 
 void *producer(void *arg) {
-    struct msg *mp = (struct msg *)malloc(sizeof(struct msg));
+    struct msg *mp = (struct msg *) malloc(sizeof(struct msg));
     int n = 10;
     while (n--) {
         mp->num = rand() % 1000 + 1;

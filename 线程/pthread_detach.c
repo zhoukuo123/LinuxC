@@ -11,7 +11,7 @@ void *thr_fn(void *arg) {
         printf("thread count %d\n", n);
         sleep(1);
     }
-    return (void *)1;
+    return (void *) 1;
 }
 
 int main() {
@@ -27,7 +27,7 @@ int main() {
         if (err != 0) {
             fprintf(stderr, "thread %s\n", strerror(err));
         } else {
-            fprintf(stdout, "thread exit code %d\n", (int)tret);
+            fprintf(stdout, "thread exit code %d\n", (int) tret);
         }
         sleep(1);
     }

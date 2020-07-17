@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
     serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
     int result;
-    result =  bind(lfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
+    result = bind(lfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
     if (result == -1) {
         sys_err("bind", __LINE__);
     }
@@ -57,8 +57,8 @@ int main(int argc, char *argv[]) {
 
         char client_IP[1024];
         printf("client ip:%s port:%d\n",
-                inet_ntop(AF_INET, &clit_addr.sin_addr.s_addr, client_IP, sizeof(client_IP)),
-                ntohs(clit_addr.sin_port));
+               inet_ntop(AF_INET, &clit_addr.sin_addr.s_addr, client_IP, sizeof(client_IP)),
+               ntohs(clit_addr.sin_port));
 
         write(cfd, tmp, strlen(tmp));
     }

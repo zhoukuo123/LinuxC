@@ -6,7 +6,7 @@
 
 void *th_fun(void *arg) {
     int i = 0;
-    int *p = (int *)arg;
+    int *p = (int *) arg;
     printf("thread PID = %d\n", getpid());
     printf("thread ID = %lu\n", pthread_self());
     printf("thread *arg = %d\n", *p);
@@ -20,7 +20,7 @@ int main() {
     pthread_t tid;
     int n = 10;
 
-    pthread_create(&tid, NULL, th_fun, (void *)&n);
+    pthread_create(&tid, NULL, th_fun, (void *) &n);
     printf("main thread ID = %lu\n", pthread_self());
     pthread_cancel(tid);
     while (1) {

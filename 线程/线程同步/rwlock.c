@@ -9,7 +9,7 @@ pthread_rwlock_t rwlock;
 
 void *th_write(void *arg) {
     int t;
-    int i = (int)arg;
+    int i = (int) arg;
     while (i--) {
         pthread_rwlock_wrlock(&rwlock);
         t = counter;
@@ -22,7 +22,7 @@ void *th_write(void *arg) {
 }
 
 void *th_read(void *arg) {
-    int i = (int)arg;
+    int i = (int) arg;
     while (1) {
         pthread_rwlock_rdlock(&rwlock);
         printf("-------read %d: %lu: %d\n", i, pthread_self(), counter);
@@ -38,10 +38,10 @@ int main() {
     pthread_rwlock_init(&rwlock, NULL);
 
     for (int i = 0; i < 3; ++i) {
-        pthread_create(&tid[i], NULL, th_write, (void *)i);
+        pthread_create(&tid[i], NULL, th_write, (void *) i);
     }
     for (int i = 0; i < 5; ++i) {
-        pthread_create(&tid[i], NULL, th_read, (void *)i);
+        pthread_create(&tid[i], NULL, th_read, (void *) i);
     }
     for (int i = 0; i < 8; ++i) {
         pthread_join(tid[i], NULL);

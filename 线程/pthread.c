@@ -3,7 +3,7 @@
 #include <unistd.h>
 
 void *th_func(void *arg) {
-    int *p = (int *)arg;
+    int *p = (int *) arg;
     printf("thread PID = %d\n", getpid());
     printf("thread ID = %lu\n", pthread_self());
     printf("thread *arg = %d\n", *p);
@@ -15,7 +15,7 @@ int main() {
     pthread_t tid;
     int n = 10;
 
-    pthread_create(&tid, NULL, th_func, (void *)&n);
+    pthread_create(&tid, NULL, th_func, (void *) &n);
     printf("main thread ID = %lu\n", pthread_self());
     printf("main child thread ID = %lu\n", tid);
     printf("main PID = %d\n", getpid());

@@ -4,14 +4,14 @@
 #include <unistd.h>
 #include <pthread.h>
 
-void *thr_fn1(void * arg) {
+void *thr_fn1(void *arg) {
     printf("thread 1 returning\n");
-    return (void *)1;
+    return (void *) 1;
 }
 
 void *thr_fn2(void *arg) {
     printf("thread 2 exiting\n");
-    pthread_exit((void *)2);
+    pthread_exit((void *) 2);
 }
 
 void *thr_fn3(void *arg) {
@@ -27,18 +27,18 @@ int main() {
 
     pthread_create(&tid, NULL, thr_fn1, NULL);
     pthread_join(tid, &tret);
-    printf("thread 1 exit code %d\n", (int)tret);
+    printf("thread 1 exit code %d\n", (int) tret);
 
     pthread_create(&tid, NULL, thr_fn2, NULL);
     pthread_join(tid, &tret);
-    printf("thread 2 exit code %d\n", (int)tret);
+    printf("thread 2 exit code %d\n", (int) tret);
 
     pthread_create(&tid, NULL, thr_fn3, NULL);
     sleep(3);
     pthread_cancel(tid);
     pthread_join(tid, &tret);
     // (int)tret = PTHREAD_CANCELED = -1
-    printf("thread 3 exit code %d\n", (int)tret);
+    printf("thread 3 exit code %d\n", (int) tret);
 
     return 0;
 }
