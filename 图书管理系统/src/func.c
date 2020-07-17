@@ -1550,6 +1550,25 @@ int ModifyPi() {
 }
 
 //-------------------链表4
+struct Node4 {
+    //数据域
+    char row0[MAXLENGTH];
+    char row1[MAXLENGTH];
+    char row2[MAXLENGTH];
+    char row3[MAXLENGTH];
+    char row4[MAXLENGTH];
+    char row5[MAXLENGTH];
+    char row6[MAXLENGTH];
+    char row7[MAXLENGTH];
+    char row8[MAXLENGTH];
+    char row9[MAXLENGTH];
+    char row10[MAXLENGTH];
+
+    struct Node4 *next;    //指针域(指向节点的指针）
+};
+struct Node4 *head4 = NULL;
+struct Node4 *end4 = NULL;
+
 void
 AddListTill4(char *row0, char *row1, char *row2, char *row3, char *row4, char *row5, char *row6, char *row7, char *row8,
              char *row9, char *row10) {
@@ -1581,9 +1600,6 @@ AddListTill4(char *row0, char *row1, char *row2, char *row3, char *row4, char *r
     }
     end4 = temp;            //尾结点应该始终指向最后一个
 }
-
-struct Node4 *head4 = NULL;
-struct Node4 *end4 = NULL;
 
 void ScanList4() {
     struct Node4 *temp = head4;        //定义一个临时变量来指向头
@@ -1629,7 +1645,7 @@ int Checkbook(int flag) {
         //mysql_query(&mysql, "commit;");
         //mysql_query(&mysql, "rollback;");
         if (mysql_query(&mysql, "select * from book")) {
-            printf("\n\t【震惊！保存图书信息的表格连不上了，快快给 lib_it@gmail.com 发封邮件让他们来修修】\n请按任意键结束这次不愉快的体验吧，对不起了");
+            printf("\n\t保存图书信息的表格连不上了\n请按任意键结束这次不愉快的体验吧，对不起了");
             getchar();
             mysql_query(&mysql, "rollback;");
             mysql_close(&mysql);
@@ -1639,7 +1655,7 @@ int Checkbook(int flag) {
             rowcount = (int) mysql_num_rows(result);//获得结果集有多少行
 
             while (1) {
-                system("cls");
+                system("clear");
                 bookinforMenu2();
 
                 scanf("%s", type1);
@@ -1674,7 +1690,6 @@ int Checkbook(int flag) {
                             ScanList4();
                             FreeList4();
                         }
-
                     }
 
                     if (flag == 1) {
@@ -2220,7 +2235,7 @@ int Checkbook(int flag) {
 int Addbook() {
     mysql_init(&mysql);
     if (!(mysql_real_connect(&mysql, IP, USERNAME, PASSWORD, "library", 3306, NULL, 0))) {
-        printf("【震惊！保存图书的数据库连不上了，快快给 lib_it@gmail.com 发封邮件让他们来修修】\n请按任意键结束这次不愉快的体验吧，对不起了");
+        printf("保存图书的数据库连不上了\n请按任意键结束这次不愉快的体验吧，对不起了");
         getchar();
         mysql_close(&mysql);
         return 1;
@@ -2231,7 +2246,7 @@ int Addbook() {
         //mysql_query(&mysql, "commit;");
         //mysql_query(&mysql, "rollback;");
         if (mysql_query(&mysql, "select * from bookshelf;")) {
-            printf("\n\t【震惊！保存书架信息的表格连不上了，快快给 lib_it@gmail.com 发封邮件让他们来修修】\n请按任意键结束这次不愉快的体验吧，对不起了");
+            printf("\n\t保存书架信息的表格连不上了\n请按任意键结束这次不愉快的体验吧，对不起了");
             getchar();
             mysql_query(&mysql, "rollback;");
             mysql_close(&mysql);
@@ -2246,7 +2261,7 @@ int Addbook() {
 
             while (1) {
                 //有记录数据时，才显示记录数据
-                system("cls");
+                system("clear");
                 printf("\t ════════════════════════════ \n");
                 printf("\t       添 加 图 书 信 息                  \n");
                 printf("\t ════════════════════════════ \n");
@@ -2263,7 +2278,7 @@ int Addbook() {
                 scanf("%s", writer);
 
                 printf("\n\t价格:");
-                while (1) {
+                while (1) { // 注意: 价格的正确判断
                     if (scanf("%lf", &priceUser) == 1) {
                         //printf("\n%lf\n", priceUser);
                         break;
@@ -2271,7 +2286,6 @@ int Addbook() {
                     char c_tmp;
                     while ((c_tmp = getchar() != '\n') && c_tmp != EOF);
                     printf("\n\t请输入正确价格！\n\t价格:");
-
                 };
 
                 printf("\n\t出版社:");
@@ -2299,8 +2313,9 @@ int Addbook() {
                 printf("\n\t图书简介:");
                 scanf("%s", info);
 
+                // int --> string
                 sprintf(price, "%.2f", priceUser);
-                itoa(locationUser, location, 10);
+                sprintf(location, "%d", locationUser);
 
                 strcat(query, "insert into book values ('");
                 strcat(query, "0");
@@ -2324,12 +2339,12 @@ int Addbook() {
                 //printf("\n\t%s", query);
 
                 printf("\n\t请输入要添加多少本: ");
-                if (scanf("%d", &nBook) != 1) {
+                if (scanf("%d", &nBook) != 1) { // 注意:
                     printf("\n\t输入数据无效：共添加1本");
                 }
 
                 int flag = 1;
-                for (int k = 0; k < nBook; ++k) {
+                for (int m = 0; m < nBook; ++m) {
                     if (mysql_query(&mysql, query) != 0) {
                         mysql_query(&mysql, "rollback;");
                     } else {
@@ -2353,18 +2368,15 @@ int Addbook() {
             }
 
         }
-
         mysql_close(&mysql); //释放连接
-
     }
-
 }
 
 //修改图书信息
 int Modifybook() {
     mysql_init(&mysql);
     if (!(mysql_real_connect(&mysql, IP, USERNAME, PASSWORD, "library", 3306, NULL, 0))) {
-        printf("【震惊！保存图书的数据库连不上了，快快给 lib_it@gmail.com 发封邮件让他们来修修】\n请按任意键结束这次不愉快的体验吧，对不起了");
+        printf("保存图书的数据库连不上了\n请按任意键结束这次不愉快的体验吧，对不起了");
         getchar();
         mysql_close(&mysql);
         return 1;
@@ -2375,7 +2387,7 @@ int Modifybook() {
         //mysql_query(&mysql, "commit;");
         //mysql_query(&mysql, "rollback;");
         if (mysql_query(&mysql, "select * from bookshelf;")) {
-            printf("\n\t【震惊！保存书架信息的表格连不上了，快快给 lib_it@gmail.com 发封邮件让他们来修修】\n请按任意键结束这次不愉快的体验吧，对不起了");
+            printf("\n\t保存书架信息的表格连不上了\n请按任意键结束这次不愉快的体验吧，对不起了");
             getchar();
             mysql_query(&mysql, "rollback;");
             mysql_close(&mysql);
@@ -2387,7 +2399,7 @@ int Modifybook() {
 
             while (1) {
                 //有记录数据时，才显示记录数据
-                //system("cls");
+                //system("clear");
                 printf("\n\t\t\t════════════════════════════ \n");
                 printf("\n\t\t\t        修 改 图 书 信 息                  \n");
                 printf("\n\t\t\t════════════════════════════ \n");
@@ -2406,7 +2418,7 @@ int Modifybook() {
                     strcat(query, "%';");
                     //printf("%s", query);
                     if (mysql_query(&mysql, query)) {
-                        printf("\n\t【震惊！保存书架信息的表格连不上了，快快给 lib_it@gmail.com 发封邮件让他们来修修】\n请按任意键结束这次不愉快的体验吧，对不起了");
+                        printf("\n\t保存书架信息的表格连不上了\n请按任意键结束这次不愉快的体验吧，对不起了");
                         getchar();
                         mysql_close(&mysql);
                         return 1;
@@ -2433,7 +2445,7 @@ int Modifybook() {
                     }
                 }
 
-                system("cls");
+                system("clear");
                 printf("\t ════════════════════════════ \n");
                 printf("\t         修 改 图 书 信 息                  \n");
                 printf("\t ════════════════════════════ \n");
@@ -2445,7 +2457,7 @@ int Modifybook() {
                 strcat(query, "%';");
                 //printf("%s", query);
                 if (mysql_query(&mysql, query)) {
-                    printf("\n\t【震惊！保存书架信息的表格连不上了，快快给 lib_it@gmail.com 发封邮件让他们来修修】\n请按任意键结束这次不愉快的体验吧，对不起了");
+                    printf("\n\t保存书架信息的表格连不上了\n请按任意键结束这次不愉快的体验吧，对不起了");
                     getchar();
                     mysql_close(&mysql);
                     return 1;
@@ -2486,7 +2498,7 @@ int Modifybook() {
                         printf("\t书名:");
                         scanf("%s", bookname);
                         break;
-                    };
+                    }
                 }
 
                 while (1) {
@@ -2526,10 +2538,9 @@ int Modifybook() {
                                 while ((c_tmp = getchar() != '\n') && c_tmp != EOF);
                                 printf("\n\t请输入正确价格！\n\t价格:");
                             }
-
-                        };
+                        }
                         break;
-                    };
+                    }
                 }
 
                 while (1) {
@@ -2566,7 +2577,7 @@ int Modifybook() {
 
 
                 if (mysql_query(&mysql, "select * from bookshelf;")) {
-                    printf("\n\t【震惊！保存书架信息的表格连不上了，快快给 lib_it@gmail.com 发封邮件让他们来修修】\n请按任意键结束这次不愉快的体验吧，对不起了");
+                    printf("\n\t保存书架信息的表格连不上了\n请按任意键结束这次不愉快的体验吧，对不起了");
                     getchar();
                     mysql_query(&mysql, "rollback;");
                     mysql_close(&mysql);
@@ -2598,15 +2609,15 @@ int Modifybook() {
                         while (1) {
                             if (scanf("%d", &locationUser) == 1) {
                                 //printf("\n%d\n", locationUser);
-                                itoa(locationUser, location, 10);
+                                sprintf(location, "%d", locationUser);
                                 break;
                             }
                             char c_tmp;
                             while ((c_tmp = getchar() != '\n') && c_tmp != EOF);
                             printf("\n\t请输入正确书架号！\n\t书架号:");
-                        };
+                        }
                         break;
-                    };
+                    }
                 }
 
                 memset(query, 0, sizeof(char) * MAXLENGTH);
@@ -2628,7 +2639,7 @@ int Modifybook() {
                 strcat(query, "where isbn='");
                 strcat(query, isbn);
                 strcat(query, "';");
-                printf("%s", query);
+                // printf("%s", query);
                 if (mysql_query(&mysql, query) != 0) {
                     printf("\t 修改失败!\n%s\n", mysql_error(&mysql));
                     mysql_query(&mysql, "rollback;");
@@ -2645,22 +2656,19 @@ int Modifybook() {
                 else {
                     mysql_close(&mysql); //释放连接
                     return 2; //继续调用的信号
-                };
+                }
             }
-
         }
-
         mysql_close(&mysql); //释放连接
     }
     return 0;
 }
 
-
 //删除图书
 int Deletebook() {
     mysql_init(&mysql);
     if (!(mysql_real_connect(&mysql, IP, USERNAME, PASSWORD, "library", 3306, NULL, 0))) {
-        printf("【震惊！保存图书的数据库连不上了，快快给 lib_it@gmail.com 发封邮件让他们来修修】\n请按任意键结束这次不愉快的体验吧，对不起了");
+        printf("保存图书的数据库连不上了\n请按任意键结束这次不愉快的体验吧，对不起了");
         getchar();
         mysql_close(&mysql);
         return 1;
@@ -2671,7 +2679,7 @@ int Deletebook() {
         //mysql_query(&mysql, "commit;");
         //mysql_query(&mysql, "rollback;");
         if (mysql_query(&mysql, "select * from bookshelf;")) {
-            printf("\n\t【震惊！保存书架信息的表格连不上了，快快给 lib_it@gmail.com 发封邮件让他们来修修】\n请按任意键结束这次不愉快的体验吧，对不起了");
+            printf("\n\t保存书架信息的表格连不上了\n请按任意键结束这次不愉快的体验吧，对不起了");
             getchar();
             mysql_query(&mysql, "rollback;");
             mysql_close(&mysql);
@@ -2706,25 +2714,17 @@ int Deletebook() {
                 else {
                     mysql_close(&mysql); //释放连接
                     return 2; //继续调用的信号
-                };
+                }
             }
-
         }
-
         mysql_close(&mysql); //释放连接
     }
 }
 
 //操作图书信息
 int Operatebook() {
-    //查询图书信息
-    int checkbook();
-    //增添图书
-    int Addbook();
-    //修改图书
-    int Modifybook();
-    //删除图书
-    int Deletebook();
+    //删除/修改图书
+    int DMbook();
     mysql_init(&mysql);
     if (!mysql_real_connect(&mysql, IP, USERNAME, PASSWORD, "library", 3306, NULL, 0)) {
         printf("保存书籍信息的数据库连不上了\n请按任意键结束这次不愉快的体验吧，对不起了");
@@ -2738,7 +2738,7 @@ int Operatebook() {
         //mysql_query(&mysql, "commit;");
         //mysql_query(&mysql, "rollback;");
         if (mysql_query(&mysql, "select * from book")) {
-            printf("\n\t【震惊！保存图书信息的表格连不上了，快快给 lib_it@gmail.com 发封邮件让他们来修修】\n请按任意键结束这次不愉快的体验吧，对不起了");
+            printf("\n\t保存图书信息的表格连不上了\n请按任意键结束这次不愉快的体验吧，对不起了");
             getchar();
             mysql_query(&mysql, "rollback;");
             mysql_close(&mysql);
@@ -2749,11 +2749,11 @@ int Operatebook() {
 
             while (1) {
 
-                system("cls");
+                system("clear");
                 bookinforMenu1();
                 scanf("%s", type1);
                 if (strcmp(type1, "1") == 0) {
-                    system("cls");
+                    system("clear");
                     Checkbook(0);
                 } else if (strcmp(type1, "2") == 0) {
                     DMbook();
@@ -2778,16 +2778,10 @@ int Operatebook() {
             return 0;
         }
     }
-
 }
 
 //删除/修改图书信息
 int DMbook() {
-    //删除图书
-    int Deletebook();
-    // 修改图书信息
-    int Modifybook();
-
     mysql_init(&mysql);
     if (!mysql_real_connect(&mysql, IP, USERNAME, PASSWORD, "library", 3306, NULL, 0)) {
         printf("保存书籍信息的数据库连不上了\n请按任意键结束这次不愉快的体验吧，对不起了");
@@ -2801,7 +2795,7 @@ int DMbook() {
         //mysql_query(&mysql, "commit;");
         //mysql_query(&mysql, "rollback;");
         if (mysql_query(&mysql, "select * from book")) {
-            printf("\n\t【震惊！保存图书信息的表格连不上了，快快给 lib_it@gmail.com 发封邮件让他们来修修】\n请按任意键结束这次不愉快的体验吧，对不起了");
+            printf("\n\t保存图书信息的表格连不上了\n请按任意键结束这次不愉快的体验吧，对不起了");
             getchar();
             mysql_query(&mysql, "rollback;");
             mysql_close(&mysql);
@@ -2863,7 +2857,7 @@ int ScanList5() {
 
 int FreeList5() {
     //一个一个NULL
-    struct Node *temp = head5;        //定义一个临时变量来指向头
+    struct Node5 *temp = head5;        //定义一个临时变量来指向头
     while (temp != NULL) {
         //	printf("%d\n",temp->a);
         struct Node5 *pt = temp;
@@ -2895,7 +2889,7 @@ int borrowinfo() {
             result = mysql_store_result(&mysql);//获得结果集
             rowcount = (int) mysql_num_rows(result);//获得结果集有多少行
             while (1) {
-                system("cls");
+                system("clear");
                 bookinforMenu3();
                 scanf("%s", type2);
                 if (strcmp(type2, "1") == 0) {
@@ -3059,7 +3053,7 @@ int countlist() {
             result = mysql_store_result(&mysql);//获得结果集
             rowcount = (int) mysql_num_rows(result);//获得结果集有多少行
             while (1) {
-                system("cls");
+                system("clear");
                 countMenu();
                 scanf("%s", type);
                 //借书总数
@@ -3336,7 +3330,7 @@ int checkfines() {   //首先连接数据库
             result = mysql_store_result(&mysql);//获得结果集
             rowcount = (int) mysql_num_rows(result);//获得结果集有多少行
             while (1) {
-                system("cls");
+                system("clear");
                 checkfinesMenu();
                 scanf("%s", fines);
                 if (strcmp(fines, "1") == 0) {
@@ -3456,7 +3450,7 @@ int Backup() {
         //mysql_query(&mysql, "commit;");
         int i;
         while (1) {
-            system("cls");
+            system("clear");
             char road[MAXLENGTH];
             char a[MAXLENGTH] = "mysqldump -u";
             char a2[MAXLENGTH] = "mysql -u";
@@ -3493,7 +3487,7 @@ int Backup() {
 
                 if (i == 1) {
                     if (mysql_query(&mysql, "select * from book;")) {
-                        printf("\n\t【震惊！保存图书信息的表格连不上了，快快给 lib_it@gmail.com 发封邮件让他们来修修】\n请按任意键结束这次不愉快的体验吧，对不起了");
+                        printf("\n\t保存图书信息的表格连不上了\n请按任意键结束这次不愉快的体验吧，对不起了");
                         getchar();
                         mysql_query(&mysql, "rollback;");
                         mysql_close(&mysql);
@@ -3519,7 +3513,7 @@ int Backup() {
                     break;
                 } else if (i == 3) {
                     if (mysql_query(&mysql, "select * from book;")) {
-                        printf("\n\t【震惊！保存图书信息的表格连不上了，快快给 lib_it@gmail.com 发封邮件让他们来修修】\n请按任意键结束这次不愉快的体验吧，对不起了");
+                        printf("\n\t保存图书信息的表格连不上了\n请按任意键结束这次不愉快的体验吧，对不起了");
                         getchar();
                         mysql_query(&mysql, "rollback;");
                         mysql_close(&mysql);
@@ -3544,7 +3538,7 @@ int Backup() {
                     break;
                 } else if (i == 5) {
                     if (mysql_query(&mysql, "select * from book;")) {
-                        printf("\n\t【震惊！保存图书信息的表格连不上了，快快给 lib_it@gmail.com 发封邮件让他们来修修】\n请按任意键结束这次不愉快的体验吧，对不起了");
+                        printf("\n\t保存图书信息的表格连不上了\n请按任意键结束这次不愉快的体验吧，对不起了");
                         getchar();
                         mysql_query(&mysql, "rollback;");
                         mysql_close(&mysql);
@@ -3568,7 +3562,7 @@ int Backup() {
                     break;
                 } else if (i == 7) {
                     if (mysql_query(&mysql, "select * from book;")) {
-                        printf("\n\t【震惊！保存图书信息的表格连不上了，快快给 lib_it@gmail.com 发封邮件让他们来修修】\n请按任意键结束这次不愉快的体验吧，对不起了");
+                        printf("\n\t保存图书信息的表格连不上了\n请按任意键结束这次不愉快的体验吧，对不起了");
                         getchar();
                         mysql_query(&mysql, "rollback;");
                         mysql_close(&mysql);
@@ -3593,7 +3587,7 @@ int Backup() {
                     break;
                 } else if (i == 9) {
                     if (mysql_query(&mysql, "select * from book;")) {
-                        printf("\n\t【震惊！保存图书信息的表格连不上了，快快给 lib_it@gmail.com 发封邮件让他们来修修】\n请按任意键结束这次不愉快的体验吧，对不起了");
+                        printf("\n\t保存图书信息的表格连不上了\n请按任意键结束这次不愉快的体验吧，对不起了");
                         getchar();
                         mysql_query(&mysql, "rollback;");
                         mysql_close(&mysql);
@@ -3727,15 +3721,4 @@ void SetBackupRoad() {
 
 
 }
-
-
-
-
-
-
-
-
-
-
-
 
