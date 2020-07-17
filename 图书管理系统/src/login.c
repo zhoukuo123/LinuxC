@@ -218,7 +218,7 @@ int registerAccount() {
         strcat(query, login_phone);
         strcat(query, "','");
         strcat(query, login_department);
-        strcat(query, "','");
+        strcat(query, "',");
         strcat(query, "0,20,2,0)");
 
         // printf("%s", query);
@@ -367,13 +367,70 @@ int adminLogin() {
         } else {
             AdminLoginMenu();
             result = mysql_store_result(&mysql);//获得结果集
-            rowcount = (int)mysql_num_rows(result);//获得结果集有多少行
+            rowcount = (int) mysql_num_rows(result);//获得结果集有多少行
             if (rowcount == 0) {
                 printf("\n\t\t\t【管理员账户数据为空");
                 getchar();
                 mysql_free_result(result);
                 mysql_close(&mysql);
                 return 1;
+            } else {
+                int have_id = 0, have_password = 0;
+                printf("\n\t\t\t请输入您的用户名：");
+                scanf("%s", login_id);
+
+                printf("\n\t\t\t请输入您的密码：");
+                char c = '\0';
+                int i = 0;
+                initscr(); // getch()使用前的初始化
+                while ((c = getch()) != '\r') { // '\r'是回车符'\n'是换行符
+                    // int isprint(int c) 在头文件ctype.h中
+                    // 检查所传的字符是否是可打印的。可打印字符是非控制字符的字符。
+                    // 如果 c 是一个可打印的字符, 返回非0值, 否则返回0
+                    if (i < MAXLENGTH && isprint(c)) {
+                        login_password[i++] = c;
+                        putchar('*');
+                    } else if (i > 0 && c == '\b') {
+                        --i;
+                        putchar('\b');
+                        putchar(' ');
+                        putchar('\b');
+                    }
+                }
+                endwin(); // getch()使用后的注销
+                putchar('\n');
+                login_password[i] = '\0';
+
+                while (row = mysql_fetch_row(result)) {
+                    if (!strcmp(row[0], login_id)) {
+                        have_id = 1;
+                        if (!strcmp(row[1], login_password)) {
+                            have_password = 1;
+                            break;
+                        }
+                        break;
+                    }
+                }
+
+                if (have_id == 0) {
+                    printf("\n\t\t\t【用户名不存在!】\n\n\n\t\t\t");
+                    getchar();
+                    mysql_free_result(result);
+                    mysql_close(&mysql);
+                    return 1;
+                } else if (have_password == 0) {
+                    printf("\n\t\t\t【密码不对!】\n\n\n\t\t\t");
+                    getchar();
+                    mysql_free_result(result);
+                    mysql_close(&mysql);
+                    return 1;
+                } else {
+                    printf("\n\n\t\t\t【尊贵的管理员用户，欢迎欢迎！】");
+                    sleep(800);
+                    mysql_free_result(result);
+                    mysql_close(&mysql);
+                    return 0;
+                }
             }
         }
     }
