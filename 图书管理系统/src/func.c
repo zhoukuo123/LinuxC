@@ -3044,7 +3044,7 @@ int countlist() {
         //mysql_query(&mysql, "commit;");
         //mysql_query(&mysql, "rollback;");
         if (mysql_query(&mysql, "select * from borrowed")) {
-            printf("\n\t【震惊！保存借阅信息的表格连不上了，快快给 lib_it@gmail.com 发封邮件让他们来修修】\n请按任意键结束这次不愉快的体验吧，对不起了");
+            printf("\n\t保存借阅信息的表格连不上了\n请按任意键结束这次不愉快的体验吧，对不起了");
             getchar();
             mysql_query(&mysql, "rollback;");
             mysql_close(&mysql);
@@ -3321,7 +3321,7 @@ int checkfines() {   //首先连接数据库
         //mysql_query(&mysql, "commit;");
         //mysql_query(&mysql, "rollback;");
         if (mysql_query(&mysql, "select * from borrowed")) {
-            printf("\n\t【震惊！保存借阅信息的表格连不上了，快快给 lib_it@gmail.com 发封邮件让他们来修修】\n请按任意键结束这次不愉快的体验吧，对不起了");
+            printf("\n\t保存借阅信息的表格连不上了\n请按任意键结束这次不愉快的体验吧，对不起了");
             getchar();
             mysql_query(&mysql, "rollback;");
             mysql_close(&mysql);
@@ -3370,15 +3370,12 @@ int checkfines() {   //首先连接数据库
                         strcat(query, "';");
                         mysql_query(&mysql, query);
 
-                        if (1) {
-                            printf("\n\n\t【罚金已经结清！！!】\n");
-                            Sleep(800);
-                            mysql_free_result(result);    //释放结果集
-                            mysql_query(&mysql, "commit;");
-                            mysql_close(&mysql);          //释放连接
-                            return 0;
-                        }
-
+                        printf("\n\n\t【罚金已经结清！！!】\n");
+                        sleep(800);
+                        mysql_free_result(result);    //释放结果集
+                        mysql_query(&mysql, "commit;");
+                        mysql_close(&mysql);          //释放连接
+                        return 0;
                     }
                     continue;
                 }
@@ -3402,7 +3399,7 @@ int checkfines() {   //首先连接数据库
                     } else {
                         row = mysql_fetch_row(result);
 
-                        //修改个人罚金为0
+                        //修改个人罚金为1
                         memset(query, 0, sizeof(char) * MAXLENGTH);
                         strcat(query, "update reader set reader_penalty=1 where reader_id = ");
                         strcat(query, "'");
@@ -3410,15 +3407,12 @@ int checkfines() {   //首先连接数据库
                         strcat(query, "';");
                         mysql_query(&mysql, query);
 
-                        if (1) {
-                            printf("\n\n\t【罚金已经增加！！!】\n\t");
-                            Sleep(800);
-                            mysql_free_result(result);    //释放结果集
-                            mysql_query(&mysql, "commit;");
-                            mysql_close(&mysql);          //释放连接
-                            return 0;
-                        }
-
+                        printf("\n\n\t【罚金已经增加！！!】\n\t");
+                        sleep(800);
+                        mysql_free_result(result);    //释放结果集
+                        mysql_query(&mysql, "commit;");
+                        mysql_close(&mysql);          //释放连接
+                        return 0;
                     }
                     continue;
                 }
@@ -3611,6 +3605,8 @@ int Backup() {
                     getchar();
                     break;
                 } else if (i == 11) {
+                    int SetBackupRoad();
+
                     SetBackupRoad();
                     mysql_close(&mysql);
 
@@ -3627,7 +3623,7 @@ int Backup() {
 }
 
 //备份路径设置
-void SetBackupRoad() {
+int SetBackupRoad() {
     char Pan[MAXLENGTH];
     char folder[MAXLENGTH];
     char r[MAXLENGTH] = " ";
@@ -3718,7 +3714,5 @@ void SetBackupRoad() {
             }
         }
     }
-
-
 }
 

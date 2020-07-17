@@ -1,4 +1,4 @@
-#include "menu.h"
+#include "../common/menu.h"
 
 //菜单1：登陆+注册选择
 void loginMenu() {
@@ -166,7 +166,6 @@ void checkfinesMenu() {
     printf("\t\t\t║\t\t\t\t0 - 退出\t\t\t\t\t║\n");
     printf("\t\t\t╚═══════════════════════════════════════════════════════════════════════════════╝\n");
     printf("\n\t\t\t 请选择(0-2):");
-
 }
 
 // 管理员登陆

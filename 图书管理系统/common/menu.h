@@ -34,4 +34,6 @@ void AdminLoginMenu();
 
 //菜单9：读者登录
 void ReaderLoginMenu();
+//菜单10：查看罚金
+void checkfinesMenu();
 
