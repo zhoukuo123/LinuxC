@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <mysql/mysql.h>
+#include <curses.h>
+#include <ctype.h>
 #include "main.h"
 
 #define _CRT_SECURE_NO_WARNINGS

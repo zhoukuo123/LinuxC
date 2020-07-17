@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <mysql/mysql.h>
+#include <curses.h>
 #include "../common/func.h"
 #include "../common/menu.h"
 #include "../common/login.h"
