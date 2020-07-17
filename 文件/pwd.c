@@ -8,13 +8,12 @@
 
 #define SIZE 4096
 
-int main()
-{
+int main() {
     char buf[SIZE];
 
     chdir("/");
     printf("%s\n", getcwd(buf, sizeof(buf)));
-     
+
     return 0;
 }
 

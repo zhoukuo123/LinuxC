@@ -49,8 +49,7 @@ void fsize(char *name) {
     printf("%8ld %s\n", stbuf.st_size, name);
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     int i = 0;
     if (argc == 1) {
         fsize(".");

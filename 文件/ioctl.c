@@ -7,8 +7,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 
-int main()
-{
+int main() {
     struct winsize size;
     if (isatty(STDOUT_FILENO) == 0) {
         exit(1);

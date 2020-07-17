@@ -9,8 +9,7 @@
 
 #define SIZE 1000
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     char buf[SIZE];
     if (argc < 3) {
         printf("./mycp src dest\n");

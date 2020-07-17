@@ -9,8 +9,7 @@
 
 #define MSG_TRY "try again\n"
 
-int main()
-{
+int main() {
     char buf[10];
     int n;
     int flags;

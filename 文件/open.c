@@ -7,8 +7,7 @@
 #include <unistd.h>
 
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     int fd;
     char buf[] = "helloWrold\n";
 
@@ -25,7 +24,7 @@ int main(int argc, char *argv[])
     }
     write(fd, buf, strlen(buf));
     close(fd);
-    
+
     return 0;
 }
 

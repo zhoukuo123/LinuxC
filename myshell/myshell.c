@@ -17,8 +17,11 @@
 
 void print_prompt(); // 打印提示符
 void explain_input(char *buf, int *argcount, char arglist[][256]);
+
 void do_cmd(int argcount, char arglist[][256]);
+
 int find_command(char *command);
+
 void history();
 
 int main(int argc, char *argv[]) {
@@ -129,7 +132,7 @@ void explain_input(char *buf, int *argcount, char arglist[100][256]) {
 void do_cmd(int argcount, char arglist[100][256]) {
     int flag = 0, how = NORMAL, background = 0;
     int status, fd;
-    char *arg[argcount+1], *argnext[argcount+1], *argnext2[argcount+1];
+    char *arg[argcount + 1], *argnext[argcount + 1], *argnext2[argcount + 1];
     char *file;
     pid_t pid;
 
@@ -182,7 +185,7 @@ void do_cmd(int argcount, char arglist[100][256]) {
     for (int k = 0; arg[k] != NULL; ++k) {
         if (strcmp(arg[k], ">") == 0) {
             how = OUT_REDIRECT;
-            if (arg[k+1] == NULL) {
+            if (arg[k + 1] == NULL) {
                 printf("wrong command\n");
                 return;
             }
@@ -197,7 +200,7 @@ void do_cmd(int argcount, char arglist[100][256]) {
         if (strcmp(arg[k], "|") == 0) {
             flag++;
             how = HAVE_PIPE;
-            if (arg[k+1] == NULL) {
+            if (arg[k + 1] == NULL) {
                 printf("wrong command\n");
                 return;
             }
@@ -211,7 +214,7 @@ void do_cmd(int argcount, char arglist[100][256]) {
     if (how == OUT_REDIRECT) {
         for (int i = 0; arg[i] != NULL; ++i) {
             if (strcmp(arg[i], ">") == 0) {
-                file = arg[i+1];
+                file = arg[i + 1];
                 arg[i] = NULL;
             }
         }
@@ -219,7 +222,7 @@ void do_cmd(int argcount, char arglist[100][256]) {
     if (how == IN_REDIRECT) {
         for (int i = 0; arg[i] != NULL; ++i) {
             if (strcmp(arg[i], "<") == 0) {
-                file = arg[i+1];
+                file = arg[i + 1];
                 arg[i] = NULL;
             }
         }
@@ -232,17 +235,17 @@ void do_cmd(int argcount, char arglist[100][256]) {
                 arg[i] = NULL;
                 int j;
                 cnt++;
-                for (j = i+1; arg[j] != NULL && strcmp(arg[j], "|") != 0; ++j) {
+                for (j = i + 1; arg[j] != NULL && strcmp(arg[j], "|") != 0; ++j) {
                     if (flag == 1) {
-                        argnext[j-i-1] = arg[j];
-                        argnext[j-i] = NULL;
+                        argnext[j - i - 1] = arg[j];
+                        argnext[j - i] = NULL;
                     } else if (flag == 2) {
                         if (cnt == 2) {
-                            argnext2[j-i-1] = arg[j];
-                            argnext2[j-i] = NULL;
+                            argnext2[j - i - 1] = arg[j];
+                            argnext2[j - i] = NULL;
                         } else {
-                            argnext[j-i-1] = arg[j];
-                            argnext[j-i] = NULL;
+                            argnext[j - i - 1] = arg[j];
+                            argnext[j - i] = NULL;
                         }
                     }
                 }
@@ -257,7 +260,7 @@ void do_cmd(int argcount, char arglist[100][256]) {
         printf("fork error\n");
         return;
     }
-    switch(how) {
+    switch (how) {
         case NORMAL:
             if (pid == 0) {
                 if (!strcmp(arg[0], "history")) {
@@ -412,7 +415,7 @@ int find_command(char *command) {
 
 void history() {
     int fd = 0;
-    char *buf = (char *)malloc(sizeof(char) * 1000);
+    char *buf = (char *) malloc(sizeof(char) * 1000);
 
     fd = open("/tmp/history", O_RDWR);
     if (fd < 0) {

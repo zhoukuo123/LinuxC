@@ -35,7 +35,7 @@ int main() {
         flags = fcntl(fd[0], F_GETFL);
         flags |= O_NONBLOCK;
         fcntl(fd[0], F_SETFL, flags);
-    tryagain:
+        tryagain:
         len = read(fd[0], buf, sizeof(buf));
         if (len == -1) {
             if (errno == EAGAIN) {

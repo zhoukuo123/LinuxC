@@ -7,8 +7,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
-int main()
-{
+int main() {
     // 关闭标准输出
     close(STDOUT_FILENO);
     int fd;

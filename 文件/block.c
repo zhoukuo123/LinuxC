@@ -7,8 +7,7 @@
 #include <stdio.h>
 
 
-int main()
-{
+int main() {
     char buf[100];
     int len;
 

@@ -19,14 +19,14 @@ void ls_display_current_dir(char *name) {
     DIR *dirp;
     if ((dirp = opendir(name)) == NULL) {
         perror("opendir");
-        return; 
+        return;
     }
     while ((dp = readdir(dirp)) != NULL) {
         if (!strcmp(dp->d_name, ".") || !strcmp(dp->d_name, "..")) {
             continue;
         }
         printf("%s\n", dp->d_name);
-        }
+    }
     closedir(dirp);
 }
 
@@ -57,7 +57,7 @@ void ls_l_display_current_dir(char *name) {
                 printf("r");
             } else {
                 printf("-");
-            } 
+            }
             if (stbuf.st_mode & S_IWUSR) {
                 printf("w");
             } else {
@@ -101,7 +101,7 @@ void ls_l_display_current_dir(char *name) {
             printf("%lu ", stbuf.st_nlink);
             // username groupname
             struct passwd *psd;
-            struct group  *grp;
+            struct group *grp;
             psd = getpwuid(stbuf.st_uid);
             grp = getgrgid(stbuf.st_gid);
             printf("%s %s %ld  ", psd->pw_name, grp->gr_name, stbuf.st_size);
@@ -114,9 +114,6 @@ void ls_l_display_current_dir(char *name) {
             printf("%s\n", dp->d_name);
 
 
-
-
-
         }
 
     }
@@ -127,9 +124,8 @@ void ls_l_display_dir_or_file(char *name) {
 
 }
 
-int main(int argc, char *argv[])
-{
-    
+int main(int argc, char *argv[]) {
+
     if (argc == 1) {
         int fd;
         ls_display_current_dir(".");
@@ -138,7 +134,7 @@ int main(int argc, char *argv[])
     } else if (argc == 3 && !strcmp(argv[1], "-l")) {
         ls_l_display_dir_or_file(argv[2]);
     }
-    
+
     return 0;
 }
 

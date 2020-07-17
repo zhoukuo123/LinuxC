@@ -11,8 +11,7 @@ void my_err(const char *err_string, int line) {
     exit(1);
 }
 
-int main()
-{
+int main() {
     int ret, access_mode, fd;
 
     if ((fd = open("test.c", O_RDWR | O_CREAT | O_TRUNC, S_IRWXU)) == -1) {

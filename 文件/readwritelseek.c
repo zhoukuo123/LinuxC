@@ -33,7 +33,7 @@ int my_read(int fd) {
     if ((ret = read(fd, read_buf, len) != len)) {
         my_err("read", __LINE__);
     }
-    
+
     // 打印数据
     for (i = 0; i < len; i++) {
         printf("%c", read_buf[i]);
@@ -42,29 +42,27 @@ int my_read(int fd) {
     return ret;
 }
 
-int main()
-{
+int main() {
     int fd;
     char write_buf[32] = "Hello World!";
 
     if ((fd = open("test.c", O_RDWR | O_CREAT | O_TRUNC, S_IRWXU)) == -1) {
         my_err("open", __LINE__);
-    }
-    else {
+    } else {
         printf("Creat file success\n");
     }
 
-    if (write(fd, write_buf, strlen(write_buf)) != (ssize_t)strlen(write_buf)) {
+    if (write(fd, write_buf, strlen(write_buf)) != (ssize_t) strlen(write_buf)) {
         my_err("write", __LINE__);
     }
     my_read(fd);
-    
+
     // 演示文件间隔
     if (lseek(fd, 10, SEEK_END) == -1) {
         my_err("lseek", __LINE__);
     }
-    if (write(fd, write_buf, strlen(write_buf)) != (ssize_t)strlen(write_buf)) {
-        my_err("write", __LINE__); 
+    if (write(fd, write_buf, strlen(write_buf)) != (ssize_t) strlen(write_buf)) {
+        my_err("write", __LINE__);
     }
     my_read(fd);
     close(fd);

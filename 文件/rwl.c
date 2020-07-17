@@ -38,8 +38,7 @@ int my_read(int fd) {
     return ret;
 }
 
-int main()
-{
+int main() {
     int fd;
     char write_buf[32] = "Hello World!";
 
@@ -49,7 +48,7 @@ int main()
         printf("Create file success!\n");
     }
 
-    if (write(fd, write_buf, strlen(write_buf)) != (ssize_t)strlen(write_buf)) {
+    if (write(fd, write_buf, strlen(write_buf)) != (ssize_t) strlen(write_buf)) {
         my_err("write", __LINE__);
     }
     my_read(fd);
@@ -58,7 +57,7 @@ int main()
     if (lseek(fd, 10, SEEK_END) == -1) {
         my_err("lseek", __LINE__);
     }
-    if (write(fd, write_buf, strlen(write_buf)) != (ssize_t)strlen(write_buf)) {
+    if (write(fd, write_buf, strlen(write_buf)) != (ssize_t) strlen(write_buf)) {
         my_err("lseek", __LINE__);
     }
     my_read(fd);

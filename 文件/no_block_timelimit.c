@@ -11,8 +11,7 @@
 #define MSG_TIMEOUT "timeout\n"
 #define SIZE 10
 
-int main()
-{
+int main() {
     char buf[SIZE];
     int fd, n, i;
     fd = open("/dev/tty", O_RDONLY | O_NONBLOCK);

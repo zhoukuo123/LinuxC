@@ -8,8 +8,7 @@
 #define MSG_TRY "try again\n"
 #define SIZE 10
 
-int main()
-{
+int main() {
     char buf[SIZE];
     int fd, len;
     fd = open("/dev/tty", O_RDONLY | O_NONBLOCK);

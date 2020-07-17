@@ -9,8 +9,7 @@
 #include <linux/fb.h> // screeninfo头文件
 #include <sys/ioctl.h> // ioctl函数头文件
 
-int main()
-{
+int main() {
     int fd;
     struct fb_var_screeninfo fb_info;
     fd = open("/dev/fb0", O_RDONLY);

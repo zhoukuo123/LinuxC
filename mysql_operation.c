@@ -47,16 +47,16 @@ int use_mysql(const char *string, MYSQL mysql1) {
     ret = mysql_query(&mysql, string);
     if (!ret) {
         result = mysql_store_result(&mysql);
-        if(result) {
+        if (result) {
             num_fields = mysql_num_fields(result);
-            while((field = mysql_fetch_field(result))) {
+            while ((field = mysql_fetch_field(result))) {
                 printf("%-20s", field->name);
             }
             printf("\n");
             row = mysql_fetch_row(result);
-            while(row) {
-                for(i = 0; i < num_fields; i++) {
-                    if(row[i]){
+            while (row) {
+                for (i = 0; i < num_fields; i++) {
+                    if (row[i]) {
                         printf("%-20s", row[i]);
                     }
                 }
@@ -65,8 +65,7 @@ int use_mysql(const char *string, MYSQL mysql1) {
             }
         }
         mysql_free_result(result);
-    }
-    else {
+    } else {
         printf("query fail\n");
         return -1;
     }

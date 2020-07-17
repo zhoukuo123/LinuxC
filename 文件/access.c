@@ -3,8 +3,7 @@
 #include <errno.h>
 #include <stdlib.h>
 
-int main()
-{
+int main() {
     if (access("abc", F_OK) < 0) {
         perror("abc");
         exit(1);

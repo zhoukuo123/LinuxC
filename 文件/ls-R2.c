@@ -12,14 +12,14 @@ void dirwalk(char *dir, void(*func)(char *)) {
     char name[MAX_PATH];
     struct dirent *dp;
     DIR *dirp;
-    if((dirp = opendir(dir)) == NULL) {
+    if ((dirp = opendir(dir)) == NULL) {
         perror("opendir");
         return;
     }
     while ((dp = readdir(dirp)) != NULL) {
         if (!strcmp(dp->d_name, ".") || !strcmp(dp->d_name, "..")) {
             continue;
-        } 
+        }
         if (strlen(dir) + strlen(dp->d_name) + 2 > sizeof(name)) {
             fprintf(stderr, "dirwalk:name %s %s too long\n", dir, dp->d_name);
         } else {
@@ -32,7 +32,7 @@ void dirwalk(char *dir, void(*func)(char *)) {
 
 void fsize(char *name) {
     struct stat stbuf;
-    
+
     if (stat(name, &stbuf) == -1) {
         perror("stat");
         return;
@@ -44,8 +44,7 @@ void fsize(char *name) {
     }
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     int i = 0;
     if (argc == 1) {
         fsize(".");

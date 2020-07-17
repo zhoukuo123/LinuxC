@@ -6,6 +6,7 @@
 #include <sys/mman.h>
 #include <unistd.h>
 #include <fcntl.h>
+
 #define MAP_LEN 0x1000
 
 struct Stu {
@@ -30,7 +31,7 @@ int main(int argc, char *argv[]) {
     if (fd < 0) {
         sys_err("open", 1);
     }
-    if (lseek(fd, MAP_LEN-1, SEEK_SET) < 0) {
+    if (lseek(fd, MAP_LEN - 1, SEEK_SET) < 0) {
         sys_err("lseek", 3);
     }
     if (write(fd, "\0", 1) < 0) {

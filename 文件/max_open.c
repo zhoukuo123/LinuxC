@@ -9,8 +9,7 @@
 // unistd == unix standard unix 标准头文件
 // fcntl == file control
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     int fd;
     char name[2000];
     int i = 0;

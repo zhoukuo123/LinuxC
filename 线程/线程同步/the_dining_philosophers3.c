@@ -22,7 +22,7 @@ void eat(int i) {
 }
 
 void *philosopher(void *arg) {
-    int i = (int)arg;
+    int i = (int) arg;
 
     think(i);
     hungry(i);
@@ -53,7 +53,7 @@ int main() {
     }
 
     for (int i = 0; i < 5; ++i) {
-        pthread_create(&tid[i], NULL, philosopher, (void *)i);
+        pthread_create(&tid[i], NULL, philosopher, (void *) i);
     }
 
     for (int i = 0; i < 5; ++i) {

@@ -38,19 +38,19 @@ typedef struct Node {
     char filename[NAME_MAX];
     long time;
     struct Node *next;
-}Node;
+} Node;
 
-typedef Node* LinkedList;
+typedef Node *LinkedList;
 
 LinkedList p;
 
 void initLinkedList() {
-    p = (LinkedList)malloc(sizeof(Node));
+    p = (LinkedList) malloc(sizeof(Node));
     p->next = NULL;
 }
 
 int addTailLinkedList(char *name, long t) {
-    LinkedList  newNode = (LinkedList)malloc(sizeof(Node));
+    LinkedList newNode = (LinkedList) malloc(sizeof(Node));
     LinkedList cur = p;
     while (cur->next != NULL) {
         cur = cur->next;

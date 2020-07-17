@@ -8,7 +8,7 @@ int main(int argc, char *argv[]) {
         printf("./mykill signal pid\n");
         exit(1);
     }
-    if (kill((pid_t)atoi(argv[2]), atoi(argv[1])) < 0) {
+    if (kill((pid_t) atoi(argv[2]), atoi(argv[1])) < 0) {
         perror("kill");
         exit(1);
     }

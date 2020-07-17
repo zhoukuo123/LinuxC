@@ -7,18 +7,17 @@
 
 #define SIZE 8192
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     char buf[SIZE];
     int fd_src, fd_dest, len;
-    
+
     if (argc < 3) {
         printf("./mycp src dest\n");
         exit(1);
     }
     fd_src = open(argv[1], O_RDONLY);
     fd_dest = open(argv[2], O_CREAT | O_WRONLY | O_TRUNC, 0644);
-    
+
     /*
      * 成功返回读到的字节数
      * 读到文件末尾返回0
