@@ -1,4 +1,5 @@
 #pragma once
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,14 +14,17 @@ int borrowBooks(char book_id[MAXLENGTH], char read_id[MAXLENGTH]);
 
 //还书---查询借阅情况+还书
 int checkBorrowed();
+
 int returnBooks(char book_id[MAXLENGTH], char reader_id[MAXLENGTH]);
 
 //查询个人信息
 int checkInfo();
+
 int updateInfo(int updateNum, char read_id[MAXLENGTH]);
 
 //申请续借
 int checkRenew();
+
 int renew(char book_id[MAXLENGTH], char reader_id[MAXLENGTH]);
 
 //交延期罚金
@@ -36,6 +40,24 @@ int ModifyPi();
 //查询图书信息
 int checkbook(int flag);
 
+//增添图书
+int Addbook();
 
+//修改图书
+int Modifybook();
 
+//删除图书
+int Deletebook();
+
+//操作图书信息
+int Operatebook();
+
+//查看借书信息
+int borrowinfo();
+
+//统计
+int countlist();
+
+//查询罚金列表
+int checkfines();
 
