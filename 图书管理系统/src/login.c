@@ -270,7 +270,7 @@ int readerLogin() {
                 int i = 0;
 //                initscr(); // getch()使用前的初始化
                 setbuf(stdin, NULL); // 清空缓冲区
-                while ((c = getch()) != '\n') { // '\r'是回车符'\n'是换行符 注意
+                while ((c = getch()) != '\r') { // '\r'是回车符'\n'是换行符 注意
                     // int isprint(int c) 在头文件ctype.h中
                     // 检查所传的字符是否是可打印的。可打印字符是非控制字符的字符。
                     // 如果 c 是一个可打印的字符, 返回非0值, 否则返回0
@@ -372,7 +372,7 @@ int adminLogin() {
                 int i = 0;
 //                initscr(); // getch()使用前的初始化
                 setbuf(stdin, NULL);
-                while ((c = getch()) != '\n') { // '\r'是回车符'\n'是换行符
+                while ((c = getch()) != '\r') { // '\r'是回车符'\n'是换行符
                     // int isprint(int c) 在头文件ctype.h中
                     // 检查所传的字符是否是可打印的。可打印字符是非控制字符的字符。
                     // 如果 c 是一个可打印的字符, 返回非0值, 否则返回0
