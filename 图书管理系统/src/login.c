@@ -4,54 +4,33 @@ int getch(void);
 
 //窗口配置
 void widget() {
-//    //获得cmd窗口句柄
-//    HWND hWnd = GetConsoleWindow();
-//
-//    //修改背景色
-//    system("color E0");
-//
-//    //修改窗口大小
-//    ShowWindow(hWnd,SW_SHOWMAXIMIZED);
-//
-//    //获得cmd窗口对应矩形
-//    RECT rc;
-//    GetWindowRect(hWnd, &rc);
-//
-//    //改变cmd窗口风格
-//    SetWindowLongPtr(hWnd,
-//                     GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) & ~WS_THICKFRAME & ~WS_MAXIMIZEBOX & ~WS_MINIMIZEBOX);
-//    //因为风格涉及到边框改变，必须调用SetWindowPos，否则无效果
-//    SetWindowPos(hWnd,
-//                 NULL,
-//                 rc.left,
-//                 rc.top,
-//                 rc.right - rc.left, rc.bottom - rc.top,
-//                 NULL);
-//
-//    //设置窗口标题
-//    SetConsoleTitle(L"图书馆管理系统 ！重磅重制版");
+// 修改窗口大小
+
+// 设置窗口标题
 }
 
 //初始化进度
 void progressBar() {
     puts("\033[2J"); // 清屏操作
-    printf("等一下哈，先让我加载一会儿！\n");
+    printf("加载中, 请稍等...\n");
     int i = 0;
     char bar[102] = {0};
-    char *lab = "-\\|/";
+    char *lab = "-\\|/"; // 转义
     while (i <= 100) {
         printf("[%-101s][%d%%][%c]\r", bar, i, lab[i % 4]);
         fflush(stdout);
         if (i <= 10) {
-            usleep(60);
+            usleep(60000);
         } else if (i <= 60) {
-            usleep(15);
-        } else usleep(30);
+            usleep(15000);
+        } else {
+            usleep(30000);
+        }
         bar[i++] = '#';
         bar[i] = '\0';
     }
-    printf("\n加载成功，我来啦！\n");
-    usleep(1100);
+    printf("\n加载成功！\n");
+    usleep(110000);
     puts("\033[2J"); // 清屏操作
 }
 
@@ -291,7 +270,7 @@ int readerLogin() {
                 int i = 0;
 //                initscr(); // getch()使用前的初始化
                 setbuf(stdin, NULL); // 清空缓冲区
-                while ((c = getch()) != '\n') { // '\r'是回车符'\n'是换行符
+                while ((c = getch()) != '\n') { // '\r'是回车符'\n'是换行符 注意
                     // int isprint(int c) 在头文件ctype.h中
                     // 检查所传的字符是否是可打印的。可打印字符是非控制字符的字符。
                     // 如果 c 是一个可打印的字符, 返回非0值, 否则返回0

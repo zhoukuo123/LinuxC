@@ -497,7 +497,7 @@ void
 AddListTill2(char *row0, char *row1, char *row2, char *row3, char *row4, char *row5, char *row6, char *row7, char *row8,
              char *row9, char *row10) {
     //创建一个节点
-    struct Node2 *temp = (struct Node2 *) malloc(sizeof(struct Node2));        //此处注意强制类型转换
+    struct Node2 *temp = (struct Node2 *) malloc(sizeof(struct Node2));       
 
     //节点数据进行赋值
     strcpy(temp->row0, row0);
@@ -1113,7 +1113,8 @@ int payDelayPenalty(char reader_id[MAXLENGTH]) {
                 char c = '\0';
                 int i = 0;
 //                initscr(); // getch()使用前的初始化
-                while ((c = getch()) != '\r') {
+                setbuf(stdin, NULL);
+                while ((c = getch()) != '\n') {
                     if (i < MAXLENGTH && isprint(c)) {
                         school_password[i++] = c;
                         putchar('*');
@@ -1241,7 +1242,7 @@ struct Node7 *end7 = NULL;
 
 void AddListTill7(char *row0, char *row1, char *row2, char *row3, char *row4) {
     //创建一个节点
-    struct Node7 *temp = (struct Node7 *) malloc(sizeof(struct Node7));        //此处注意强制类型转换
+    struct Node7 *temp = (struct Node7 *) malloc(sizeof(struct Node7));       
 
     //节点数据进行赋值
     strcpy(temp->row0, row0);
@@ -1356,7 +1357,7 @@ struct Node3 *end3 = NULL;
 
 void AddListTill3(char *row0, char *row1) {
     //创建一个节点
-    struct Node3 *temp = (struct Node3 *) malloc(sizeof(struct Node3));        //此处注意强制类型转换
+    struct Node3 *temp = (struct Node3 *) malloc(sizeof(struct Node3));       
 
     //节点数据进行赋值
     strcpy(temp->row0, row0);
@@ -1593,7 +1594,7 @@ void
 AddListTill4(char *row0, char *row1, char *row2, char *row3, char *row4, char *row5, char *row6, char *row7, char *row8,
              char *row9, char *row10) {
     //创建一个节点
-    struct Node4 *temp = (struct Node4 *) malloc(sizeof(struct Node4));        //此处注意强制类型转换
+    struct Node4 *temp = (struct Node4 *) malloc(sizeof(struct Node4));       
 
     //节点数据进行赋值
     strcpy(temp->row0, row0);
@@ -2843,7 +2844,7 @@ struct Node5 *head5 = NULL;
 struct Node5 *end5 = NULL;
 
 int AddList5(char *row0, char *row1, char *row2, char *row3, char *row4) {    //创建一个节点
-    struct Node5 *temp = (struct Node5 *) malloc(sizeof(struct Node5));        //此处注意强制类型转换
+    struct Node5 *temp = (struct Node5 *) malloc(sizeof(struct Node5));       
 
     //节点数据进行赋值
     strcpy(temp->row0, row0);
@@ -3006,7 +3007,7 @@ struct Node6 *head6 = NULL;
 struct Node6 *end6 = NULL;
 
 int AddList6(char *row0, char *row1) {    //创建一个节点
-    struct Node6 *temp = (struct Node6 *) malloc(sizeof(struct Node6));        //此处注意强制类型转换
+    struct Node6 *temp = (struct Node6 *) malloc(sizeof(struct Node6));       
 
     //节点数据进行赋值
     strcpy(temp->row0, row0);

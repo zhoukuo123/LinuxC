@@ -65,13 +65,16 @@ int main() {
     //part0 设置窗口
     widget();
 
+    // 初始化进度
+    progressBar();
+
     //part1	初始化数据库
     mysql_init(&mysql);
     // progressBar(); //模拟初始化进度
 
     //第一部分：登陆+注册
     int identity = 0;
-////////////////****** identity-- 要改成 1  *******/////////////////////////////////////////////////
+
     while (1) {
         puts("\033[2J"); // 清屏操作
         loginMenu();
