@@ -1,5 +1,23 @@
 #include "../common/func.h"
 
+int getch(void) {
+    struct termios tm, tm_old;
+    int fd = STDIN_FILENO, c;
+    if (tcgetattr(fd, &tm) < 0)
+        return -1;
+    tm_old = tm;
+    cfmakeraw(&tm);
+    if (tcsetattr(fd, TCSANOW, &tm) < 0)
+        return -1;
+    c = fgetc(stdin);
+    if (tcsetattr(fd, TCSANOW, &tm_old) < 0)
+        return -1;
+    if (c == 3)
+        exit(1);
+    //按Ctrl+C结束退出
+    return c;
+}
+
 //////////////////////借阅者的函数功能部分///////////////////////
 /**
  * 借书---查询图书信息+借书
@@ -17,32 +35,65 @@ int borrowBooks(char book_id[MAXLENGTH], char reader_id[MAXLENGTH]) {
         return 1;
     } else {
         //接着看是否能连接到借阅人的表
-        mysql_query(&mysql, "set names 'gbk'");
+        mysql_query(&mysql, "set names 'utf8'");
         mysql_query(&mysql, "set autocommit=0;");
         memset(query, 0, sizeof(char) * MAXLENGTH);
         strcat(query, "select * from book where book_id = '");
         strcat(query, book_id);
         strcat(query, "'");
+
         if (mysql_query(&mysql, query)) {
-            if (mysql_query(&mysql, query)) {
-                printf("保存信息的表格连不上了\n");
+            printf("保存信息的表格连不上了\n");
+            getchar();
+            mysql_query(&mysql, "rollback;");
+            mysql_close(&mysql);
+            return 1;
+        } else {
+            result = mysql_store_result(&mysql);//获得结果集
+            rowcount = (int) mysql_num_rows(result);//获得结果集有多少行
+            row = mysql_fetch_row(result);
+            if (rowcount == 0) {
+                printf("\n\t\t\t本书不存在！\n\t\t\t");
                 getchar();
+                mysql_free_result(result);    //释放结果集
                 mysql_query(&mysql, "rollback;");
-                mysql_close(&mysql);
+                mysql_close(&mysql);          //释放连接
                 return 1;
-            } else {
-                result = mysql_store_result(&mysql);//获得结果集
-                rowcount = (int) mysql_num_rows(result);//获得结果集有多少行
-                row = mysql_fetch_row(result);
-                if (rowcount == 0) {
-                    printf("\n\t\t\t本书不存在！\n\t\t\t");
-                    getchar();
-                    mysql_free_result(result);    //释放结果集
-                    mysql_query(&mysql, "rollback;");
-                    mysql_close(&mysql);          //释放连接
-                    return 1;
-                } else if (strcmp(row[7], "0") != 0) {
-                    printf("\n\t\t\t这本书图书馆里已经没有存货了！\n\t\t\t");
+            } else if (strcmp(row[7], "0") != 0) {
+                printf("\n\t\t\t这本书图书馆里已经没有存货了！\n\t\t\t");
+                getchar();
+                mysql_free_result(result);    //释放结果集
+                mysql_query(&mysql, "rollback;");
+                mysql_close(&mysql);          //释放连接
+                return 1;
+            }
+
+            mysql_free_result(result);    //释放结果集
+            mysql_query(&mysql, "select * from reader");
+            result = mysql_store_result(&mysql);//获得结果集
+            rowcount = (int) mysql_num_rows(result);//获得结果集有多少行
+            //借书是在查询书之后，所以用户名和密码都存在，图书信息也是存在的，因而只存在有罚金和所借图书超过20本的现象
+
+            while (row = mysql_fetch_row(result)) {
+                //找到了这个人
+                if (!strcmp(row[0], reader_id)) {
+                    //有罚金返回到菜单界面
+                    //printf("%d", atoi(row[10]));
+                    if (atoi(row[10]) == 1) {
+                        printf("\n\t\t\t处于罚款中, 不能借阅图书!\n\t\t\t");
+                        getchar();
+                        mysql_free_result(result);    //释放结果集
+                        mysql_query(&mysql, "rollback;");
+                        mysql_close(&mysql);          //释放连接
+                        return 1;
+                    }
+                }
+
+                //如果所借已经=20本，返回菜单
+                //printf("%d", atoi(row[7]));
+                //getchar();
+                if (atoi(row[7]) >= 20) {
+                    printf("\n\t\t\t所借图书超过20本, 不能再借!\n\t\t\t");
                     getchar();
                     mysql_free_result(result);    //释放结果集
                     mysql_query(&mysql, "rollback;");
@@ -50,123 +101,92 @@ int borrowBooks(char book_id[MAXLENGTH], char reader_id[MAXLENGTH]) {
                     return 1;
                 }
 
-                mysql_free_result(result);    //释放结果集
-                mysql_query(&mysql, "select * from reader");
+                //开始进行借书操作
+                //读者表
+                //所借+1
+                memset(query, 0, sizeof(char) * MAXLENGTH);
+                strcat(query, "update reader set reader_have_borrowed=reader_have_borrowed+1 where reader_id = ");
+                strcat(query, "'");
+                strcat(query, reader_id);
+                strcat(query, "'");
+                mysql_query(&mysql, query);
+
+                //可借-1
+                memset(query, 0, sizeof(char) * MAXLENGTH);
+                strcat(query,
+                       "update reader set reader_left_borrowTimes=reader_left_borrowTimes-1 where reader_id = ");
+                strcat(query, "'");
+                strcat(query, reader_id);
+                strcat(query, "'");
+                mysql_query(&mysql, query);
+
+                //处理图书表，被借后状态变为1
+                mysql_free_result(result);
+                mysql_query(&mysql, "select * from book");//重新获取结果
                 result = mysql_store_result(&mysql);//获得结果集
-                rowcount = (int) mysql_num_rows(result);//获得结果集有多少行
-                //借书是在查询书之后，所以用户名和密码都存在，图书信息也是存在的，因而只存在有罚金和所借图书超过20本的现象
+                rowcount = (int) mysql_num_rows((result));//获得结果集有多少行
 
                 while (row = mysql_fetch_row(result)) {
-                    //找到了这个人
-                    if (!strcmp(row[0], reader_id)) {
-                        //有罚金返回到菜单界面
-                        //printf("%d", atoi(row[10]));
-                        if (atoi(row[10]) == 1) {
-                            printf("\n\t\t\t处于罚款中, 不能借阅图书!\n\t\t\t");
-                            getchar();
-                            mysql_free_result(result);    //释放结果集
-                            mysql_query(&mysql, "rollback;");
-                            mysql_close(&mysql);          //释放连接
-                            return 1;
-                        }
+                    //找到了这本书
+                    if (!strcmp(row[0], book_id)) {
+                        memset(query, 0, sizeof(char) * MAXLENGTH);
+                        strcat(query, "update book set borrowed=1 where book_id = ");
+                        strcat(query, "'");
+                        strcat(query, book_id);
+                        strcat(query, "'");
+                        mysql_query(&mysql, query);
+                        break;
                     }
+                }
 
-                    //如果所借已经=20本，返回菜单
-                    //printf("%d", atoi(row[7]));
-                    //getchar();
-                    if (atoi(row[7]) >= 20) {
-                        printf("\n\t\t\t所借图书超过20本, 不能再借!\n\t\t\t");
-                        getchar();
-                        mysql_free_result(result);    //释放结果集
-                        mysql_query(&mysql, "rollback;");
-                        mysql_close(&mysql);          //释放连接
-                        return 1;
-                    }
+                //最后添加借阅记录
+                mysql_free_result(result);
+                if (mysql_query(&mysql, "select * from borrowed")) {
+                    printf("\n\t【保存借阅信息的表格连接失败\n请按任意键结束");
+                    getchar();
+                    mysql_query(&mysql, "rollback;");
+                    mysql_close(&mysql);
+                    return 1;
+                }
 
-                    //开始进行借书操作
-                    //读者表
-                    //所借+1
-                    memset(query, 0, sizeof(char) * MAXLENGTH);
-                    strcat(query, "update reader set reader_have_borrowed=reader_have_borrowed+1 where reader_id = ");
-                    strcat(query, "'");
-                    strcat(query, reader_id);
-                    strcat(query, "'");
-                    mysql_query(&mysql, query);
+                result = mysql_store_result(&mysql);
+                rowcount = (int) mysql_num_rows(result);
 
-                    //可借-1
-                    memset(query, 0, sizeof(char) * MAXLENGTH);
-                    strcat(query,
-                           "update reader set reader_left_borrowTimes=reader_left_borrowTimes-1 where reader_id = ");
-                    strcat(query, "'");
-                    strcat(query, reader_id);
-                    strcat(query, "'");
-                    mysql_query(&mysql, query);
+                //拼接语句
+                memset(query, 0, sizeof(char) * MAXLENGTH);
+                strcat(query, "insert into borrowed values('");
+                strcat(query, book_id);
+                strcat(query, "','");
+                strcat(query, reader_id);
+                strcat(query, "',");
+                strcat(query, "now()");
+                strcat(query, ",");
+                strcat(query, "DATE_SUB(now(), INTERVAL -30 DAY),1"); // 注意: 设置归还时间
+                strcat(query, ")");
 
-                    //处理图书表，被借后状态变为1
+                if (mysql_query(&mysql, query) != 0) { //将dest插入到数据库中(db_books)
+                    puts("\033[2J"); // 清屏操作
+                    printf("【保存借阅信息的数据库连接失败】\n%s\n请按任意键结束...", mysql_error(&mysql));
+                    getchar();
                     mysql_free_result(result);
-                    mysql_query(&mysql, "select * from book");//重新获取结果
-                    result = mysql_store_result(&mysql);//获得结果集
-                    rowcount = (int) mysql_num_rows((result));//获得结果集有多少行
-
-                    while (row = mysql_fetch_row(result)) {
-                        //找到了这本书
-                        if (!strcmp(row[0], book_id)) {
-                            memset(query, 0, sizeof(char) * MAXLENGTH);
-                            strcat(query, "update book set borrowed=1 where book_id = ");
-                            strcat(query, "'");
-                            strcat(query, book_id);
-                            strcat(query, "'");
-                            mysql_query(&mysql, query);
-                            break;
-                        }
-                    }
-
-                    //最后添加借阅记录
-                    mysql_free_result(result);
-                    if (mysql_query(&mysql, "select * from borrowed")) {
-                        printf("\n\t【保存借阅信息的表格连接失败\n请按任意键结束");
-                        getchar();
-                        mysql_query(&mysql, "rollback;");
-                        mysql_close(&mysql);
-                        return 1;
-                    }
-
-                    result = mysql_store_result(&mysql);
-                    rowcount = (int) mysql_num_rows(result);
-
-                    //拼接语句
-                    memset(query, 0, sizeof(char) * MAXLENGTH);
-                    strcat(query, "insert into borrowed values('");
-                    strcat(query, book_id);
-                    strcat(query, "','");
-                    strcat(query, reader_id);
-                    strcat(query, "',");
-                    strcat(query, "now()");
-                    strcat(query, ",");
-                    strcat(query, "DATE_SUB(now(), INTERVAL -30 DAY),1"); // 注意: 设置归还时间
-                    strcat(query, ")");
-
-                    if (mysql_query(&mysql, query) != 0) { //将dest插入到数据库中(db_books)
-                        system("clear");
-                        printf("【保存借阅信息的数据库连接失败】\n%s\n请按任意键结束...", mysql_error(&mysql));
-                        getchar();
-                        mysql_free_result(result);
-                        mysql_query(&mysql, "rollback;");
-                        mysql_close(&mysql);
-                        return 1;
-                    } else {
-                        printf("\n\n\t\t\t【借书成功！！!】\n");
-                        sleep(800);
-                        mysql_free_result(result);    //释放结果集
-                        mysql_query(&mysql, "commit;");
-                        mysql_close(&mysql);          //释放连接
-                        return 0;
-                    }
+                    mysql_query(&mysql, "rollback;");
+                    mysql_close(&mysql);
+                    return 1;
+                } else {
+                    printf("\n\n\t\t\t【借书成功！！!】\n");
+                    usleep(800);
+                    mysql_free_result(result);    //释放结果集
+                    mysql_query(&mysql, "commit;");
+                    mysql_close(&mysql);          //释放连接
+                    return 0;
                 }
             }
         }
     }
+
 }
+
+
 
 //-------------------链表1
 struct Node1 {
@@ -235,7 +255,7 @@ int checkBorrowed() {
         return 1;
     } else {
         //接着看是否能连接到借阅人的表
-        mysql_query(&mysql, "set names 'gbk'");
+        mysql_query(&mysql, "set names 'utf8'");
         if (mysql_query(&mysql, "select * from borrowed")) {
             printf("\n\t【保存借阅信息的表格连接失败\n请按任意键结束");
             getchar();
@@ -250,7 +270,7 @@ int checkBorrowed() {
             rowcount = (int) mysql_num_rows(result);//获得结果集有多少行
             if (rowcount == 0) {
                 printf("\n\t【看来你还没借书啊，先去借一本书再来吧】\n按任意键回到上一级菜单借本书！");
-                //sleep(1000);
+                //usleep(1000);
                 getchar();
                 mysql_free_result(result);
                 mysql_close(&mysql);
@@ -318,7 +338,7 @@ int returnBooks(char book_id[MAXLENGTH], char reader_id[MAXLENGTH]) {
         return 1;
     } else {
         //接着看是否能连接到借阅人的表
-        mysql_query(&mysql, "set names 'gbk'");
+        mysql_query(&mysql, "set names 'utf8'");
         mysql_query(&mysql, "set autocommit=0;");
         if (mysql_query(&mysql, "select * ,IF(return_plan < NOW(),1,0) from borrowed;")) {
             printf("\n\t【保存借阅信息的表格连不上了】\n请按任意键结束");
@@ -334,7 +354,7 @@ int returnBooks(char book_id[MAXLENGTH], char reader_id[MAXLENGTH]) {
             //不存在借阅记录
             if (rowcount == 0) {
                 printf("\n\t【看来你也没借书啊】\n按任意键回到上一级菜单！");
-                //Sleep(1000);
+                //usleep(1000);
                 getchar();
                 mysql_free_result(result);
                 mysql_query(&mysql, "rollback;");
@@ -373,7 +393,7 @@ int returnBooks(char book_id[MAXLENGTH], char reader_id[MAXLENGTH]) {
 
             if (flag) {
                 printf("\n\t【看来你也没借这本书啊】\n按任意键回到上一级菜单！");
-                //Sleep(1000);
+                //usleep(1000);
                 getchar();
                 mysql_free_result(result);
                 mysql_query(&mysql, "rollback;");
@@ -433,7 +453,7 @@ int returnBooks(char book_id[MAXLENGTH], char reader_id[MAXLENGTH]) {
 
             if (mysql_query(&mysql, query) != 0) //将dest插入到数据库中(db_books)
             {
-                system("clear");
+                puts("\033[2J"); // 清屏操作
                 fprintf(stderr, "【保存借阅信息的数据库连不上了】\n%s\n请按任意键结束",
                         mysql_error(&mysql));
                 getchar();
@@ -540,7 +560,7 @@ int checkInfo() {
         return 1;
     } else {
         //接着看是否能连接到借阅人的表
-        mysql_query(&mysql, "set names 'gbk'");
+        mysql_query(&mysql, "set names 'utf8'");
         memset(query, 0, sizeof(char) * MAXLENGTH);
         strcpy(query, "SELECT reader_id,reader_password,reader_name,IF(reader_sex=1,'男','女'),\
 			(CASE reader_grade\
@@ -624,7 +644,7 @@ int updateInfo(int updateNum, char reader_id[MAXLENGTH]) {
         return 1;
     } else {
         //接着看是否能连接到借阅人的表
-        mysql_query(&mysql, "set names 'gbk'");
+        mysql_query(&mysql, "set names 'utf8'");
         mysql_query(&mysql, "set autocommit=0;");
         //mysql_query(&mysql, "commit;");
         //mysql_query(&mysql, "rollback;");
@@ -831,7 +851,7 @@ int updateInfo(int updateNum, char reader_id[MAXLENGTH]) {
 
                 //判断是不是非法输入，非法输入或者0直接返回
                 if (strcmp(order, "0") != 0) {
-                    system("clear");
+                    puts("\033[2J"); // 清屏操作
                     if (result != NULL)mysql_free_result(result);
                     mysql_close(&mysql);
                     return 2;
@@ -857,7 +877,7 @@ int checkRenew() {
         return 1;
     } else {
         //接着看是否能连接到借阅人的表
-        mysql_query(&mysql, "set names 'gbk'");
+        mysql_query(&mysql, "set names 'utf8'");
         if (mysql_query(&mysql, "select * from borrowed")) {
             printf("\n\t【保存借阅人信息的表格连不上了】\n请按任意键结束这次不愉快的体验吧，对不起了");
             getchar();
@@ -873,7 +893,7 @@ int checkRenew() {
 
             if (rowcount == 0) {
                 printf("\n\t【看来你还没借书啊，先去借一本书再来吧】\n\t回到上一级菜单借本书！\n\n\t");
-                //Sleep(1000);
+                //usleep(1000);
                 getchar();
                 mysql_free_result(result);
                 mysql_close(&mysql);
@@ -924,7 +944,7 @@ int renew(char book_id[MAXLENGTH], char reader_id[MAXLENGTH]) {
         return 1;
     } else {
         //接着看是否能连接到借阅人的表
-        mysql_query(&mysql, "set names 'gbk'");
+        mysql_query(&mysql, "set names 'utf8'");
         mysql_query(&mysql, "set autocommit=0;");
         //mysql_query(&mysql, "commit;");
         //mysql_query(&mysql, "rollback;");
@@ -945,7 +965,7 @@ int renew(char book_id[MAXLENGTH], char reader_id[MAXLENGTH]) {
             //不存在借阅记录
             if (rowcount == 0) {
                 printf("\n\t【看来你也没借书啊】\n\t按任意键回到上一级菜单！\n\t");
-                //Sleep(1000);
+                //usleep(1000);
                 getchar();
                 mysql_free_result(result);
                 mysql_query(&mysql, "rollback;");
@@ -975,7 +995,7 @@ int renew(char book_id[MAXLENGTH], char reader_id[MAXLENGTH]) {
 
             if (flag) {
                 printf("\n\t【看来你也没借这本书啊】\n\t按任意键回到上一级菜单！\n\t");
-                //Sleep(1000);
+                //usleep(1000);
                 getchar();
                 mysql_free_result(result);
                 mysql_query(&mysql, "rollback;");
@@ -1011,7 +1031,7 @@ int renew(char book_id[MAXLENGTH], char reader_id[MAXLENGTH]) {
 
             if (mysql_query(&mysql, query) != 0) //修改看是否成功
             {
-                system("clear");
+                puts("\033[2J"); // 清屏操作
                 fprintf(stderr, "【保存借阅信息的数据库连不上了】\n%s\n请按任意键结束这次不愉快的体验吧，对不起了",
                         mysql_error(&mysql));
                 getchar();
@@ -1021,7 +1041,7 @@ int renew(char book_id[MAXLENGTH], char reader_id[MAXLENGTH]) {
                 return 1;
             } else {
                 printf("\n\n\t【续借成功！！!】\n\t");
-                sleep(800);
+                usleep(800);
                 getchar();
                 mysql_free_result(result);    //释放结果集
                 mysql_query(&mysql, "commit;");
@@ -1043,7 +1063,7 @@ int payDelayPenalty(char reader_id[MAXLENGTH]) {
         return 1;
     } else {
         //接着看是否能连接到借阅人的表
-        mysql_query(&mysql, "set names 'gbk'");
+        mysql_query(&mysql, "set names 'utf8'");
         mysql_query(&mysql, "set autocommit=0;");
         //mysql_query(&mysql, "commit;");
         //mysql_query(&mysql, "rollback;");
@@ -1092,7 +1112,7 @@ int payDelayPenalty(char reader_id[MAXLENGTH]) {
                 //星号密码显示部分
                 char c = '\0';
                 int i = 0;
-                initscr(); // getch()使用前的初始化
+//                initscr(); // getch()使用前的初始化
                 while ((c = getch()) != '\r') {
                     if (i < MAXLENGTH && isprint(c)) {
                         school_password[i++] = c;
@@ -1104,7 +1124,7 @@ int payDelayPenalty(char reader_id[MAXLENGTH]) {
                         putchar('\b');
                     }
                 }
-                endwin(); // getch()使用后的注销
+//                endwin(); // getch()使用后的注销
                 putchar('\n');
                 school_password[i] = '\0';
 
@@ -1124,7 +1144,7 @@ int payDelayPenalty(char reader_id[MAXLENGTH]) {
                     rowcount = (int) mysql_num_rows(result);//获得结果集有多少行
                     if (rowcount == 0) {
                         printf("\n\t【校园卡号不存在】\n\t");
-                        //sleep(1000);
+                        //usleep(1000);
                         getchar();
                         mysql_free_result(result);
                         mysql_query(&mysql, "rollback;");
@@ -1136,14 +1156,14 @@ int payDelayPenalty(char reader_id[MAXLENGTH]) {
                         if (strcmp(row[1], school_password) != 0) {
                             //printf("%s %s\n", row[1], school_password);
                             printf("\n\t【校园卡密码错误】\n\t");
-                            //Sleep(1000);
+                            //usleep(1000);
                             getchar();
                             mysql_free_result(result);
                             mysql_query(&mysql, "rollback;");
                             continue;
                         } else if (strcmp(row[3], "0") != 0) {
                             printf("\n\t【校园卡已被锁定，不能访问】\n\t");
-                            //Sleep(1000);
+                            //usleep(1000);
                             getchar();
                             mysql_free_result(result);
                             mysql_query(&mysql, "rollback;");
@@ -1151,7 +1171,7 @@ int payDelayPenalty(char reader_id[MAXLENGTH]) {
                             return 1;
                         } else if (atof(row[2]) < 5) {
                             printf("\n\t【校园卡余额不足，最起码要5块钱才可以！】\n\t");
-                            //Sleep(1000);
+                            //usleep(1000);
                             getchar();
                             mysql_free_result(result);
                             mysql_query(&mysql, "rollback;");
@@ -1189,14 +1209,14 @@ int payDelayPenalty(char reader_id[MAXLENGTH]) {
 
             if (flag == 0) {
                 printf("\n\n\t【罚金已经结清！！!】\n");
-                sleep(800);
+                usleep(800);
                 mysql_free_result(result);    //释放结果集
                 mysql_query(&mysql, "commit;");
                 mysql_close(&mysql);          //释放连接
                 return 0;
             } else {
                 printf("\n\n\t【错误尝试过多！！!】\n");
-                sleep(800);
+                usleep(800);
                 mysql_query(&mysql, "rollback;");
                 mysql_close(&mysql);          //释放连接
                 return 1;
@@ -1274,7 +1294,7 @@ int borrowinfoSelf() {
         return 1;
     } else {
         //接着看是否能连接到借阅人的表
-        mysql_query(&mysql, "set names 'gbk'");
+        mysql_query(&mysql, "set names 'utf8'");
         if (mysql_query(&mysql, "select * from borrowed")) {
             printf("\n\t保存借阅人信息的表格连不上了\n请按任意键结束这次不愉快的体验吧，对不起了");
             getchar();
@@ -1283,7 +1303,7 @@ int borrowinfoSelf() {
         } else {
             result = mysql_store_result(&mysql);//获得结果集
             rowcount = (int) mysql_num_rows(result);//获得结果集有多少行
-            system("clear");
+            puts("\033[2J"); // 清屏操作
             memset(query, 0, sizeof(char) * MAXLENGTH);
             strcat(query, "SELECT bo.book_id,book_name,borrow_times,return_real,IF(return_plan>return_real,'未超期','超期') FROM returned bo INNER JOIN book b\
 				ON bo.`book_id` = b.`book_id` WHERE bo.reader_id = '");
@@ -1389,7 +1409,7 @@ int SecPi() {
         return 1;
     } else {
         //接着看是否能连接到管理员的表
-        mysql_query(&mysql, "set names 'gbk'");
+        mysql_query(&mysql, "set names 'utf8'");
         mysql_query(&mysql, "set autocommit=0;");
         //mysql_query(&mysql, "commit;");
         //mysql_query(&mysql, "rollback;");
@@ -1454,7 +1474,7 @@ int ModifyPi() {
         mysql_close(&mysql);
         return 1;
     } else {
-        mysql_query(&mysql, "set names 'gbk'");
+        mysql_query(&mysql, "set names 'utf8'");
         //接着看是否能连接到管理员的表
         mysql_query(&mysql, "set autocommit=0;");
         //mysql_query(&mysql, "commit;");
@@ -1639,7 +1659,7 @@ int Checkbook(int flag) {
         mysql_close(&mysql);
         return 1;
     } else {
-        mysql_query(&mysql, "set names 'gbk'");
+        mysql_query(&mysql, "set names 'utf8'");
         //接着看是否能连接到图书的表
         mysql_query(&mysql, "set autocommit=0;");
         //mysql_query(&mysql, "commit;");
@@ -1655,7 +1675,7 @@ int Checkbook(int flag) {
             rowcount = (int) mysql_num_rows(result);//获得结果集有多少行
 
             while (1) {
-                system("clear");
+                puts("\033[2J"); // 清屏操作
                 bookinforMenu2();
 
                 scanf("%s", type1);
@@ -2241,7 +2261,7 @@ int Addbook() {
         return 1;
     } else {
         //接着看是否能连接到管理员的表
-        mysql_query(&mysql, "set names 'gbk'");
+        mysql_query(&mysql, "set names 'utf8'");
         mysql_query(&mysql, "set autocommit=0;");
         //mysql_query(&mysql, "commit;");
         //mysql_query(&mysql, "rollback;");
@@ -2261,7 +2281,7 @@ int Addbook() {
 
             while (1) {
                 //有记录数据时，才显示记录数据
-                system("clear");
+                puts("\033[2J"); // 清屏操作
                 printf("\t ════════════════════════════ \n");
                 printf("\t       添 加 图 书 信 息                  \n");
                 printf("\t ════════════════════════════ \n");
@@ -2382,7 +2402,7 @@ int Modifybook() {
         return 1;
     } else {
         //接着看是否能连接到管理员的表
-        mysql_query(&mysql, "set names 'gbk'");
+        mysql_query(&mysql, "set names 'utf8'");
         mysql_query(&mysql, "set autocommit=0;");
         //mysql_query(&mysql, "commit;");
         //mysql_query(&mysql, "rollback;");
@@ -2399,7 +2419,7 @@ int Modifybook() {
 
             while (1) {
                 //有记录数据时，才显示记录数据
-                //system("clear");
+                //puts("\033[2J"); // 清屏操作
                 printf("\n\t\t\t════════════════════════════ \n");
                 printf("\n\t\t\t        修 改 图 书 信 息                  \n");
                 printf("\n\t\t\t════════════════════════════ \n");
@@ -2445,7 +2465,7 @@ int Modifybook() {
                     }
                 }
 
-                system("clear");
+                puts("\033[2J"); // 清屏操作
                 printf("\t ════════════════════════════ \n");
                 printf("\t         修 改 图 书 信 息                  \n");
                 printf("\t ════════════════════════════ \n");
@@ -2674,7 +2694,7 @@ int Deletebook() {
         return 1;
     } else {
         //接着看是否能连接到管理员的表
-        mysql_query(&mysql, "set names 'gbk'");
+        mysql_query(&mysql, "set names 'utf8'");
         mysql_query(&mysql, "set autocommit=0;");
         //mysql_query(&mysql, "commit;");
         //mysql_query(&mysql, "rollback;");
@@ -2732,7 +2752,7 @@ int Operatebook() {
         mysql_close(&mysql);
         return 1;
     } else {
-        mysql_query(&mysql, "set names 'gbk'");
+        mysql_query(&mysql, "set names 'utf8'");
         //接着看是否能连接到图书的表
         mysql_query(&mysql, "set autocommit=0;");
         //mysql_query(&mysql, "commit;");
@@ -2749,11 +2769,11 @@ int Operatebook() {
 
             while (1) {
 
-                system("clear");
+                puts("\033[2J"); // 清屏操作
                 bookinforMenu1();
                 scanf("%s", type1);
                 if (strcmp(type1, "1") == 0) {
-                    system("clear");
+                    puts("\033[2J"); // 清屏操作
                     Checkbook(0);
                 } else if (strcmp(type1, "2") == 0) {
                     DMbook();
@@ -2789,7 +2809,7 @@ int DMbook() {
         mysql_close(&mysql);
         return 1;
     } else {
-        mysql_query(&mysql, "set names 'gbk'");
+        mysql_query(&mysql, "set names 'utf8'");
         //接着看是否能连接到图书的表
         mysql_query(&mysql, "set autocommit=0;");
         //mysql_query(&mysql, "commit;");
@@ -2879,7 +2899,7 @@ int borrowinfo() {
         return 1;
     } else {
         //接着看是否能连接到借阅人的表
-        mysql_query(&mysql, "set names 'gbk'");
+        mysql_query(&mysql, "set names 'utf8'");
         if (mysql_query(&mysql, "select * from borrowed")) {
             printf("\n\t保存借阅人信息的表格连不上了\n请按任意键结束这次不愉快的体验吧，对不起了");
             getchar();
@@ -2889,7 +2909,7 @@ int borrowinfo() {
             result = mysql_store_result(&mysql);//获得结果集
             rowcount = (int) mysql_num_rows(result);//获得结果集有多少行
             while (1) {
-                system("clear");
+                puts("\033[2J"); // 清屏操作
                 bookinforMenu3();
                 scanf("%s", type2);
                 if (strcmp(type2, "1") == 0) {
@@ -3016,7 +3036,7 @@ int ScanList6() {
 
 int FreeList6() {
     //一个一个NULL
-    struct Node *temp = head6;        //定义一个临时变量来指向头
+    struct Node6 *temp = head6;        //定义一个临时变量来指向头
     while (temp != NULL) {
         //	printf("%d\n",temp->a);
         struct Node6 *pt = temp;
@@ -3038,7 +3058,7 @@ int countlist() {
         mysql_close(&mysql);
         return 1;
     } else {
-        mysql_query(&mysql, "set names 'gbk'");
+        mysql_query(&mysql, "set names 'utf8'");
         //接着看是否能连接到图书的表
         mysql_query(&mysql, "set autocommit=0;");
         //mysql_query(&mysql, "commit;");
@@ -3053,7 +3073,7 @@ int countlist() {
             result = mysql_store_result(&mysql);//获得结果集
             rowcount = (int) mysql_num_rows(result);//获得结果集有多少行
             while (1) {
-                system("clear");
+                puts("\033[2J"); // 清屏操作
                 countMenu();
                 scanf("%s", type);
                 //借书总数
@@ -3315,7 +3335,7 @@ int checkfines() {   //首先连接数据库
         mysql_close(&mysql);
         return 1;
     } else {
-        mysql_query(&mysql, "set names 'gbk'");
+        mysql_query(&mysql, "set names 'utf8'");
         //接着看是否能连接到图书的表
         mysql_query(&mysql, "set autocommit=0;");
         //mysql_query(&mysql, "commit;");
@@ -3330,7 +3350,7 @@ int checkfines() {   //首先连接数据库
             result = mysql_store_result(&mysql);//获得结果集
             rowcount = (int) mysql_num_rows(result);//获得结果集有多少行
             while (1) {
-                system("clear");
+                puts("\033[2J"); // 清屏操作
                 checkfinesMenu();
                 scanf("%s", fines);
                 if (strcmp(fines, "1") == 0) {
@@ -3371,7 +3391,7 @@ int checkfines() {   //首先连接数据库
                         mysql_query(&mysql, query);
 
                         printf("\n\n\t【罚金已经结清！！!】\n");
-                        sleep(800);
+                        usleep(800);
                         mysql_free_result(result);    //释放结果集
                         mysql_query(&mysql, "commit;");
                         mysql_close(&mysql);          //释放连接
@@ -3408,7 +3428,7 @@ int checkfines() {   //首先连接数据库
                         mysql_query(&mysql, query);
 
                         printf("\n\n\t【罚金已经增加！！!】\n\t");
-                        sleep(800);
+                        usleep(800);
                         mysql_free_result(result);    //释放结果集
                         mysql_query(&mysql, "commit;");
                         mysql_close(&mysql);          //释放连接
@@ -3438,13 +3458,13 @@ int Backup() {
         mysql_close(&mysql);
         return 1;
     } else {
-        mysql_query(&mysql, "set names 'gbk'");
+        mysql_query(&mysql, "set names 'utf8'");
         //接着看是否能连接到图书的表
         mysql_query(&mysql, "set autocommit=0;");
         //mysql_query(&mysql, "commit;");
         int i;
         while (1) {
-            system("clear");
+            puts("\033[2J"); // 清屏操作
             char road[MAXLENGTH];
             char a[MAXLENGTH] = "mysqldump -u";
             char a2[MAXLENGTH] = "mysql -u";
@@ -3628,7 +3648,7 @@ int SetBackupRoad() {
     char folder[MAXLENGTH];
     char r[MAXLENGTH] = " ";
     char s[MAXLENGTH] = " ";
-    mysql_query(&mysql, "set names 'gbk'");
+    mysql_query(&mysql, "set names 'utf8'");
     if (mysql_query(&mysql, "select * from backuproad")) {
         printf("\n\t【震惊！保存备份路径信息的表格连不上了，快快给 lib_it@gmail.com 发封邮件让他们来修修】\n请按任意键结束这次不愉快的体验吧，对不起了");
         getchar();

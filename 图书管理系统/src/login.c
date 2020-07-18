@@ -1,5 +1,7 @@
 #include "../common/login.h"
 
+int getch(void);
+
 //窗口配置
 void widget() {
 //    //获得cmd窗口句柄
@@ -32,7 +34,7 @@ void widget() {
 
 //初始化进度
 void progressBar() {
-    system("clear");
+    puts("\033[2J"); // 清屏操作
     printf("等一下哈，先让我加载一会儿！\n");
     int i = 0;
     char bar[102] = {0};
@@ -41,16 +43,16 @@ void progressBar() {
         printf("[%-101s][%d%%][%c]\r", bar, i, lab[i % 4]);
         fflush(stdout);
         if (i <= 10) {
-            sleep(60);
+            usleep(60);
         } else if (i <= 60) {
-            sleep(15);
-        } else sleep(30);
+            usleep(15);
+        } else usleep(30);
         bar[i++] = '#';
         bar[i] = '\0';
     }
     printf("\n加载成功，我来啦！\n");
-    sleep(1100);
-    system("clear");
+    usleep(1100);
+    puts("\033[2J"); // 清屏操作
 }
 
 /**
@@ -67,7 +69,7 @@ int registerAccount() {
         mysql_close(&mysql);
         return 1;
     } else {
-        mysql_query(&mysql, "set names 'gbk'"); // 设置输出编码
+        mysql_query(&mysql, "set names 'utf8'"); // 设置输出编码
         mysql_query(&mysql, "set autocommit=0;"); // 禁用自动提交事务
         //mysql_query(&mysql, "commit;");
         //mysql_query(&mysql, "rollback;");
@@ -224,7 +226,7 @@ int registerAccount() {
         // printf("%s", query);
 
         if (mysql_query(&mysql, query) != 0) {//将dest插入到数据库中(db_books)
-            system("clear");
+            puts("\033[2J"); // 清屏操作
             fprintf(stderr, "数据库查询失败\n%s\n按任意键结束", mysql_error(&mysql));
             getchar();
             mysql_free_result(result);
@@ -233,7 +235,7 @@ int registerAccount() {
             return 1;
         } else {
             printf("\n\n\t【注册成功!】\n");
-            sleep(1500);
+            usleep(1500);
             mysql_free_result(result); //释放结果集
             mysql_query(&mysql, "commit");
             mysql_close(&mysql); //释放连接
@@ -257,7 +259,7 @@ int readerLogin() {
         return 1;
     } else {
         //查询表是否存在
-        mysql_query(&mysql, "set names 'gbk'");
+        mysql_query(&mysql, "set names 'utf8'");
         mysql_query(&mysql, "set autocommit=0");
 
         if (mysql_query(&mysql, "select * from reader")) {
@@ -287,22 +289,29 @@ int readerLogin() {
                 printf("\n\t\t\t请输入您的密码：");
                 char c = '\0';
                 int i = 0;
-                initscr(); // getch()使用前的初始化
-                while ((c = getch()) != '\r') { // '\r'是回车符'\n'是换行符
+//                initscr(); // getch()使用前的初始化
+                setbuf(stdin, NULL); // 清空缓冲区
+                while ((c = getch()) != '\n') { // '\r'是回车符'\n'是换行符
                     // int isprint(int c) 在头文件ctype.h中
                     // 检查所传的字符是否是可打印的。可打印字符是非控制字符的字符。
                     // 如果 c 是一个可打印的字符, 返回非0值, 否则返回0
+                    if (c == '\b' && i > 0) {  //删除功能
+                        i--;
+                        printf("\b \b");
+                    }
+
                     if (i < MAXLENGTH && isprint(c)) {
                         login_password[i++] = c;
                         putchar('*');
-                    } else if (i > 0 && c == '\b') {
-                        --i;
-                        putchar('\b');
-                        putchar(' ');
-                        putchar('\b');
                     }
+//                    else if (i > 0 && c == '\b') {
+//                        --i;
+//                        putchar('\b');
+//                        putchar(' ');
+//                        putchar('\b');
+//                    }
                 }
-                endwin(); // getch()使用后的注销
+//                endwin(); // getch()使用后的注销
                 putchar('\n');
                 login_password[i] = '\0';
 
@@ -333,7 +342,7 @@ int readerLogin() {
                     return 1;
                 } else {
                     printf("\n\n\t\t\t【尊贵的读者，欢迎欢迎！】");
-                    sleep(800);
+                    usleep(800);
                     mysql_free_result(result);
                     mysql_query(&mysql, "commit;");
                     mysql_close(&mysql);
@@ -358,7 +367,7 @@ int adminLogin() {
         return 1;
     } else {
         //查询表是否存在
-        mysql_query(&mysql, "set names 'gbk'");
+        mysql_query(&mysql, "set names 'utf8'");
         if (mysql_query(&mysql, "select * from admin")) {
             printf("保存信息的表格连不上了\n");
             getchar();
@@ -382,8 +391,9 @@ int adminLogin() {
                 printf("\n\t\t\t请输入您的密码：");
                 char c = '\0';
                 int i = 0;
-                initscr(); // getch()使用前的初始化
-                while ((c = getch()) != '\r') { // '\r'是回车符'\n'是换行符
+//                initscr(); // getch()使用前的初始化
+                setbuf(stdin, NULL);
+                while ((c = getch()) != '\n') { // '\r'是回车符'\n'是换行符
                     // int isprint(int c) 在头文件ctype.h中
                     // 检查所传的字符是否是可打印的。可打印字符是非控制字符的字符。
                     // 如果 c 是一个可打印的字符, 返回非0值, 否则返回0
@@ -397,7 +407,7 @@ int adminLogin() {
                         putchar('\b');
                     }
                 }
-                endwin(); // getch()使用后的注销
+//                endwin(); // getch()使用后的注销
                 putchar('\n');
                 login_password[i] = '\0';
 
@@ -426,7 +436,7 @@ int adminLogin() {
                     return 1;
                 } else {
                     printf("\n\n\t\t\t【尊贵的管理员用户，欢迎欢迎！】");
-                    sleep(800);
+                    usleep(800);
                     mysql_free_result(result);
                     mysql_close(&mysql);
                     return 0;

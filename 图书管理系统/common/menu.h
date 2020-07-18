@@ -1,12 +1,14 @@
-#pragma once
+#ifndef __MENU_H__
+#define __MENU_H__
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <mysql/mysql.h>
+//#include <curses.h>
+#include <ctype.h>
 #include "main.h"
-
-#define _CRT_SECURE_NO_WARNINGS
 
 //菜单1：登陆+注册选择
 void loginMenu();
@@ -37,3 +39,4 @@ void ReaderLoginMenu();
 //菜单10：查看罚金
 void checkfinesMenu();
 
+#endif
