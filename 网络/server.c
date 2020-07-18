@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
 
     cfd = accept(lfd, (struct sockaddr *) &clit_addr, &clit_addr_len);
     // 阻塞监听客户端连接, 第二个参数是传出参数, 第三个参数是传入传出
-    // 返回新的文件描述符, 是用来通信的
+    // 返回指向新的套接字的新的文件描述符, 是用来通信的
     if (cfd == -1) {
         sys_err("accept", __LINE__);
     } else {
