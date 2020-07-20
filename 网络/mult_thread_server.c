@@ -52,6 +52,10 @@ int main() {
 
     listenfd = Socket(AF_INET, SOCK_STREAM, 0);
 
+    //  设置端口复用
+    int opt = 1;
+    setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, (void *) &opt, sizeof(opt));
+
     bzero(&servaddr, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
