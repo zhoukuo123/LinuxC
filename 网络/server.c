@@ -67,6 +67,9 @@ int main(int argc, char *argv[]) {
 
     while (1) {
         result = read(cfd, buf, sizeof(buf)); // 返回实际读到的字节数
+        if (result == 0) {
+            break;
+        }
         write(STDOUT_FILENO, buf, result);
 
         for (int i = 0; i < result; ++i) {

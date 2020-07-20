@@ -13,8 +13,6 @@
 #include "menu.h"
 #include "login.h"
 
-// 未知
-//#pragma warning( disable : 4996)
 
 #define MAXLENGTH 1024
 #define IP "localhost"
