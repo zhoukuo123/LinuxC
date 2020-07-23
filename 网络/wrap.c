@@ -51,11 +51,25 @@ int Socket(int family, int type, int protocol) {
     return n;
 }
 
+/**
+ *
+ * @param fd
+ * @param ptr
+ * @param nbytes
+ * @return >0: 实际读到的字节数
+ * @return =0: socket中, 表示对端关闭.
+ * @return -1: 如果errno == EINTR 被信号中断, 需要重新读
+ * @return -1: 如果errno == EAGAIN 或 EWOULDBLOCK 以非阻塞方式读数据, 但是没有数据, 需要重新读.
+ * @return -1: 如果errno == ECONNRESET 说明连接被重置. 需要close(), 移除监听队列.
+ * @return -1: 出错
+ */
 ssize_t Read(int fd, void *ptr, size_t nbytes) {
     ssize_t n;
     again:
     if ((n = read(fd, ptr, nbytes)) == -1) {
         if (errno == EINTR) {
+            goto again;
+        } else if (errno == EAGAIN || errno == EWOULDBLOCK) {
             goto again;
         } else {
             return -1;
