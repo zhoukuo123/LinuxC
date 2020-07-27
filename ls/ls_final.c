@@ -22,6 +22,12 @@
 #define BLUE   2
 
 #define MAXROWLEN 80
+#define MAXSIZE 40
+
+typedef struct {
+    char *filename[MAXSIZE];
+    int length;
+} filename;
 
 int g_leavelen = MAXROWLEN;
 int g_maxlen;
