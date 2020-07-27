@@ -22,12 +22,14 @@
 #define BLUE   2
 
 #define MAXROWLEN 80
-#define MAXSIZE 40
+#define MAXSIZE 20
 
-typedef struct {
-    char *filename[MAXSIZE];
+typedef struct array {
+    char filename[MAXSIZE];
     int length;
-} filename;
+} arry;
+
+typedef arry *arrylist;
 
 int g_leavelen = MAXROWLEN;
 int g_maxlen;
@@ -294,12 +296,15 @@ void display_dir(int flag_param, char *path) {
     struct dirent *ptr;
     int count = 0;
     struct stat sb;
-    char **filename;
-    filename = (char **) malloc(sizeof(char *) * 20000);
+//    char **filename;
+    arrylist filename;
+//    filename = (char **) malloc(sizeof(char *) * 20000);
+    filename = (arrylist) malloc(sizeof(arrylist) * 20000);
+    filename->length = 20000;
     int t;
-    for (t = 0; t < 20000; ++t) {
-        filename[t] = (char *) malloc(sizeof(char *) * 20000);
-    }
+//    for (t = 0; t < 20000; ++t) {
+//        filename->filename[t] = (char *) malloc(sizeof(char *) * 20000);
+//    }
     long *filetime;
     filetime = (long *) malloc(sizeof(long) * 20000);
     char temp[PATH_MAX];
@@ -327,6 +332,13 @@ void display_dir(int flag_param, char *path) {
     int len = strlen(path);
 
     dir = opendir(path);
+    char **filename1;
+    for (int k = 0; k < filename->length; ++k) {
+        if (filename->length == 0) return;
+
+        filename1 = (char **) filename++->filename;
+    }
+
 
     /*获取目录下文件名和时间参数*/
     for (i = 0; i < count; i++) {
