@@ -323,9 +323,9 @@ void display_dir(int flag_param, char *path) {
 
     closedir(dir);
 
-    if (count > 20000) {
-        my_err("too many files under this directory", __LINE__);
-    }
+//    if (count > 20000) {
+//        my_err("too many files under this directory", __LINE__);
+//    }
 
     int i;
     int j;
