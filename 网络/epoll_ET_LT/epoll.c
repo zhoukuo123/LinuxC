@@ -43,7 +43,8 @@ int main() {
         close(pfd[1]);
         efd = epoll_create(10);
 
-        event.events = EPOLLIN;
+        event.events = EPOLLIN | EPOLLET; // ET 边缘触发: 缓冲区剩余未读尽的数据不会导致epoll_wait返回, 新的事件满足才会触发.
+//        event.events = EPOLLIN; // LT 水平触发(默认): 缓冲区剩余未读尽的数据会导致epoll_wait返回.
         event.data.fd = pfd[0];
         epoll_ctl(efd, EPOLL_CTL_ADD, pfd[0], &event);
 
