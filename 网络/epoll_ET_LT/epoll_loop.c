@@ -58,6 +58,60 @@ void eventadd(int efd, int events, struct myevent_s *ev) {
     int op;
     epv.data.ptr = ev;
     epv.events = ev->events = events; // EPOLLIN 或 EPOLLOUT
+
+    if (ev->status == 0) {
+        op = EPOLL_CTL_ADD; // 将其加入红黑树 g_efd, 并将status置1
+        ev->status = 1;
+    }
+
+    if (epoll_ctl(efd, op, ev->fd, &epv) < 0) { // 实际添加/修改
+        printf("event add failed [fd=%d], events[%d]\n", ev->fd, events);
+    } else {
+        printf("event add OK [fd=%d], op=%d, events[%0X]\n", ev->fd, op, events);
+    }
+
+    return;
+}
+
+// 从epoll监听的红黑树中删除一个文件描述符
+void eventdel(int efd, struct myevent_s *ev) {
+    struct epoll_event epv = {0, {0}};
+
+    if (ev->status != 1) return; // 不在红黑树上
+
+    // epv.data.ptr = ev;
+    epv.data.ptr = NULL;
+    ev->status = 0; // 修改状态
+    epoll_ctl(efd, EPOLL_CTL_DEL, ev->fd, &epv); // 从红黑树efd上将ev->fd摘除
+
+    return;
+}
+
+// 当有文件描述符就绪, epoll返回, 调用该函数与客户端建立连接
+void acceptconn(int lfd, int events, void *arg) {
+    struct sockaddr_in cin; // client addr
+    socklen_t len = sizeof(cin);
+    int cfd, i;
+
+    if ((cfd = accept(lfd, (struct sockaddr *) &cin, &len)) == -1) {
+        if (errno != EAGAIN && errno != EINTR) {
+            // 暂时不做出错处理
+        }
+        printf("%s: accept, %s\n", __func__, strerror(errno));
+        return;
+    }
+
+    do {
+        for (i = 0; i < MAX_EVENTS; ++i) {
+            if (g_events[i].status == 0) {
+                break;
+            }
+        }
+
+        if (i == MAX_EVENTS) {
+
+        }
+    }
 }
 
 // 创建socket, 初始化lfd
@@ -76,8 +130,11 @@ void initlistensocket(int efd, short port) {
 
     listen(lfd, 20);
 
+    // void eventset(struct myevent_s *ev, int fd, void (*call_back)(int, int, void *), void *arg)
     eventset(&g_events[MAX_EVENTS, lfd, acceptconn, &g_events[MAX_EVENTS]]);
 
+    // void eventadd(int efd, int events, struct myevent_s *ev)
+    eventadd(efd, EPOLLIN, &g_events[MAX_EVENTS]);
 }
 
 int main(int argc, char *argv[]) {
