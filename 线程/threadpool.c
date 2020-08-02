@@ -2,13 +2,17 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <assert.h>
+#include <signal.h>
 #include <pthread.h>
 #include <sys/types.h>
-#include <errno.h>
+//#include "threadpool.h"
 
+#define DEFAULT_TIME 10                 /*10s检测一次*/
+#define MIN_WAIT_TASK_NUM 10            /*如果queue_size > MIN_WAIT_TASK_NUM 添加新的线程到线程池*/
+#define DEFAULT_THREAD_VARY 10          /*每次创建和销毁线程的个数*/
 #define true 1
 #define false 0
-#define DEFAULT_TIME 10
 
 typedef struct {
     void *(*function)(void *); // 函数指针, 回调函数
@@ -230,6 +234,80 @@ void *adjust_thread(void *threadpool) {
 
     return NULL;
 }
+
+int threadpool_destroy(threadpool_t *pool) {
+    int i;
+    if (pool == NULL) {
+        return -1;
+    }
+    pool->shutdown = true;
+
+    /*先销毁管理线程*/
+    pthread_join(pool->adjust_tid, NULL);
+
+    for (i = 0; i < pool->live_thr_num; i++) {
+        /*通知所有的空闲线程*/
+        pthread_cond_broadcast(&(pool->queue_not_empty));
+    }
+    for (i = 0; i < pool->live_thr_num; i++) {
+        pthread_join(pool->threads[i], NULL);
+    }
+    threadpool_free(pool);
+
+    return 0;
+}
+
+int threadpool_free(threadpool_t *pool) {
+    if (pool == NULL) {
+        return -1;
+    }
+
+    if (pool->task_queue) {
+        free(pool->task_queue);
+    }
+    if (pool->threads) {
+        free(pool->threads);
+        pthread_mutex_lock(&(pool->lock));
+        pthread_mutex_destroy(&(pool->lock));
+        pthread_mutex_lock(&(pool->thread_counter));
+        pthread_mutex_destroy(&(pool->thread_counter));
+        pthread_cond_destroy(&(pool->queue_not_empty));
+        pthread_cond_destroy(&(pool->queue_not_full));
+    }
+    free(pool);
+    pool = NULL;
+
+    return 0;
+}
+
+int threadpool_all_threadnum(threadpool_t *pool) {
+    int all_threadnum = -1;                 // 总线程数
+
+    pthread_mutex_lock(&(pool->lock));
+    all_threadnum = pool->live_thr_num;     // 存活线程数
+    pthread_mutex_unlock(&(pool->lock));
+
+    return all_threadnum;
+}
+
+int threadpool_busy_threadnum(threadpool_t *pool) {
+    int busy_threadnum = -1;                // 忙线程数
+
+    pthread_mutex_lock(&(pool->thread_counter));
+    busy_threadnum = pool->busy_thr_num;
+    pthread_mutex_unlock(&(pool->thread_counter));
+
+    return busy_threadnum;
+}
+
+//int is_thread_alive(pthread_t tid)
+//{
+//    int kill_rc = pthread_kill(tid, 0);     //发0号信号，测试线程是否存活
+//    if (kill_rc == ESRCH) {
+//        return false;
+//    }
+//    return true;
+//}
 
 /* 线程池中的线程，模拟处理业务 */
 void *process(void *arg) {
