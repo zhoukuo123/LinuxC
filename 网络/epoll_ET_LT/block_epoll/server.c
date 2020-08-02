@@ -39,8 +39,8 @@ int main() {
     connfd = accept(listenfd, (struct sockaddr *) &cliaddr, &cliaddr_len);
 
     event.data.fd = connfd;
-    event.events = EPOLLIN | EPOLLET; // ET 边缘触发
-    // event.events = EPOLLIN; // 默认 LT水平触发
+//    event.events = EPOLLIN | EPOLLET; // ET 边缘触发
+    event.events = EPOLLIN; // 默认 LT水平触发
     epoll_ctl(efd, EPOLL_CTL_ADD, connfd, &event);
 
     while (1) {
