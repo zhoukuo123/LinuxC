@@ -1,13 +1,13 @@
 drop database if exists mychatroom;
 create database if not exists mychatroom character set 'utf8';
 use mychatroom;
-
+drop table user_data;
 create table user_data # 用户数据表
 (
     account     varchar(20) not null primary key,
     nickname    varchar(20) not null,
     password    varchar(20) not null,
-    user_status int         not null, # 用户状态(是否在线)
+    user_status varchar(20) not null, # 用户状态(是否在线)
     user_socket varchar(20) not null
 );
 
@@ -15,7 +15,7 @@ create table `groups` # 群信息表
 (
     group_account       varchar(20) not null primary key, # 群号
     group_name          varchar(20) not null,             # 群名
-    group_member_number int         not null              # 群成员数量
+    group_member_number varchar(20) not null              # 群成员数量
 );
 
 create table group_members # 群成员表
