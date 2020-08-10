@@ -1,4 +1,4 @@
-#include "../common/menu.h"
+#include "../include/menu.h"
 
 //菜单1：登陆+注册选择
 void loginMenu() {

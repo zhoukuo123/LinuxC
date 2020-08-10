@@ -1,4 +1,4 @@
-#include "../common/login.h"
+#include "../include/login.h"
 
 int getch(void);
 

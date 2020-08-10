@@ -34,7 +34,7 @@ int main() {
             write(pfd[1], buf, sizeof(buf));
             sleep(5);
         }
-        close(pfd[1]);
+//        close(pfd[1]);
     } else if (pid > 0) { // 父进程, 读
         struct epoll_event event;
         struct epoll_event resevent[10];
@@ -55,12 +55,12 @@ int main() {
                 write(STDOUT_FILENO, buf, len);
             }
         }
-        close(pfd[0]);
-        close(efd);
+//        close(pfd[0]);
+//        close(efd);
     } else {
         perror("fork");
         exit(-1);
     }
 
-    return 0;
+//    return 0;
 }

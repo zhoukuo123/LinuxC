@@ -1,4 +1,4 @@
-#include "../common/func.h"
+#include "../include/func.h"
 
 int getch(void) {
     struct termios tm, tm_old;

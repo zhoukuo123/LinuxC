@@ -1,4 +1,4 @@
-#include "../common/main.h"
+#include "../include/main.h"
 
 MYSQL mysql;
 MYSQL_RES *result;
