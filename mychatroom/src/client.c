@@ -65,14 +65,6 @@ void *recv_pack_thread(void *sock_fd) { // 负责接收从服务端发回来的�
                 printf("退出成功\n");
                 pthread_exit(0);
             }
-//            case EXIT_GROUP: {
-//                memset(send_pack->data.respond, 0, sizeof(send_pack->data.respond));
-//                strcpy(send_pack->data.respond, recv_pack->data.respond);
-//                pthread_mutex_lock(&mutex_cli);
-//                pthread_cond_signal(&cond_cli);
-//                pthread_mutex_unlock(&mutex_cli);
-//                break;
-//            }
             case FIND_MY_PASSWORD: {
                 memset(send_pack->data.respond, 0, sizeof(send_pack->data.respond));
                 strcpy(send_pack->data.respond, recv_pack->data.respond);
@@ -81,22 +73,6 @@ void *recv_pack_thread(void *sock_fd) { // 负责接收从服务端发回来的�
                 pthread_mutex_unlock(&mutex_cli);
                 break;
             }
-//            case DELETE_GROUP_MEMBER: { // delete_group_member 删除群成员
-//                memset(send_pack->data.respond, 0, sizeof(send_pack->data.respond));
-//                strcpy(send_pack->data.respond, recv_pack->data.respond);
-//                pthread_mutex_lock(&mutex_cli);
-//                pthread_cond_signal(&cond_cli);
-//                pthread_mutex_unlock(&mutex_cli);
-//                break;
-//            }
-//            case LOOK_GROUP_LIST: { // look_group_list 查看群组列表
-//                memset(group_list, 0, sizeof(GROUP_G));
-//                Recv(*(int *) sock_fd, group_list, sizeof(GROUP_G), MSG_WAITALL);
-//                pthread_mutex_lock(&mutex_cli);
-//                pthread_cond_signal(&cond_cli);
-//                pthread_mutex_unlock(&mutex_cli);
-//                break;
-//            }
             case SEND_FILE: { // 发文件
                 pthread_mutex_lock(&mutex_cli);
                 sing = 1;
@@ -112,18 +88,7 @@ void *recv_pack_thread(void *sock_fd) { // 负责接收从服务端发回来的�
                 file->have = 1;
                 printf("账号%d\t昵称%s\t的好友给你发送了一个%s文件快去接收吧\n", file->send_account, file->send_nickname, file->filename);
                 break;
-                /* pthread_create(&pid, NULL, thread_recv_file, sock_fd);
-                 pthread_join(pid, NULL);
-                 break;*/
             }
-//            case LOOK_GROUP_MEMBER: { // look_group_member 查看成员
-//                memset(member_list, 0, sizeof(GROUP));
-//                Recv(*(int *) sock_fd, member_list, sizeof(GROUP), MSG_WAITALL);
-//                pthread_mutex_lock(&mutex_cli);
-//                pthread_cond_signal(&cond_cli);
-//                pthread_mutex_unlock(&mutex_cli);
-//                break;
-//            }
             case OK_FILE: {
                 pthread_mutex_lock(&mutex_cli);
                 sing = 1;
@@ -143,62 +108,6 @@ void *recv_pack_thread(void *sock_fd) { // 负责接收从服务端发回来的�
                 pthread_mutex_unlock(&mutex_cli);
                 break;
             }
-//            case SET_ADMIN: { // 设置管理员
-//                memset(send_pack->data.respond, 0, sizeof(send_pack->data.respond));
-//                strcpy(send_pack->data.respond, recv_pack->data.respond);
-//                pthread_mutex_lock(&mutex_cli);
-//                pthread_cond_signal(&cond_cli);
-//                pthread_mutex_unlock(&mutex_cli);
-//                break;
-//            }
-//            case CANCEL_ADMIN: { // 取消管理员
-//                memset(send_pack->data.respond, 0, sizeof(send_pack->data.respond));
-//                strcpy(send_pack->data.respond, recv_pack->data.respond);
-//                pthread_mutex_lock(&mutex_cli);
-//                pthread_cond_signal(&cond_cli);
-//                pthread_mutex_unlock(&mutex_cli);
-//                break;
-//            }
-//            case CREATE_GROUP: { // 建群
-//                strcpy(send_pack->data.recv_user, recv_pack->data.recv_user); // 保存群昵称
-//                send_pack->data.recv_account = recv_pack->data.recv_account; // 保存群号
-//                memset(send_pack->data.respond, 0, sizeof(send_pack->data.respond));
-//                strcpy(send_pack->data.respond, recv_pack->data.respond);
-//                pthread_mutex_lock(&mutex_cli);
-//                pthread_cond_signal(&cond_cli);
-//                pthread_mutex_unlock(&mutex_cli);
-//                break;
-//            }
-//            case LOGIN: { // 登陆
-//                strcpy(send_pack->data.send_user, recv_pack->data.send_user);
-//                memset(send_pack->data.respond, 0, sizeof(send_pack->data.respond));
-//                strcpy(send_pack->data.respond, recv_pack->data.respond);
-//                send_pack->data.send_fd = recv_pack->data.recv_fd;
-//
-//                Recv(*(int *) sock_fd, box, sizeof(BOX), MSG_WAITALL);
-//                printf("离线期间消息盒子中有%d条消息,%d个好友请求,%d条群消息", box->talk_number, box->friend_number, box->number);
-//                pthread_mutex_lock(&mutex_cli);
-//                sing = 1;
-//                pthread_cond_signal(&cond_cli);
-//                pthread_mutex_unlock(&mutex_cli);
-//                break;
-//            }
-//            case DELETE_MESSAGE: { // 删除消息记录
-//                memset(send_pack->data.respond, 0, sizeof(send_pack->data.respond));
-//                strcpy(send_pack->data.respond, recv_pack->data.respond);
-//                pthread_mutex_lock(&mutex_cli);
-//                pthread_cond_signal(&cond_cli);
-//                pthread_mutex_unlock(&mutex_cli);
-//                break;
-//            }
-//            case ADD_GROUP: { // 加群
-//                memset(send_pack->data.respond, 0, sizeof(send_pack->data.respond));
-//                strcpy(send_pack->data.respond, recv_pack->data.respond);
-//                pthread_mutex_lock(&mutex_cli);
-//                pthread_cond_signal(&cond_cli);
-//                pthread_mutex_unlock(&mutex_cli);
-//                break;
-//            }
             case ACCOUNT_ERROR: { // 账号错误
                 memset(send_pack->data.respond, 0, sizeof(send_pack->data.respond));
                 strcpy(send_pack->data.respond, recv_pack->data.respond);
@@ -208,29 +117,6 @@ void *recv_pack_thread(void *sock_fd) { // 负责接收从服务端发回来的�
                 pthread_mutex_unlock(&mutex_cli);
                 break;
             }
-//            case REGISTERED: { // 注册
-//                send_pack->data.send_account = recv_pack->data.send_account;
-//                pthread_mutex_lock(&mutex_cli);
-//                pthread_cond_signal(&cond_cli);
-//                pthread_mutex_unlock(&mutex_cli);
-//                break;
-//            }
-//            case CHANGE_PASSWORD: { // 改密码
-//                memset(send_pack->data.respond, 0, sizeof(send_pack->data.respond));
-//                strcpy(send_pack->data.respond, recv_pack->data.respond);
-//                pthread_mutex_lock(&mutex_cli);
-//                pthread_cond_signal(&cond_cli);
-//                pthread_mutex_unlock(&mutex_cli);
-//                break;
-//            }
-//            case ADD_FRIEND: { // 添加好友
-//                memset(send_pack->data.respond, 0, sizeof(send_pack->data.respond));
-//                strcpy(send_pack->data.respond, recv_pack->data.respond);
-//                pthread_mutex_lock(&mutex_cli);
-//                pthread_cond_signal(&cond_cli);
-//                pthread_mutex_unlock(&mutex_cli);
-//                break;
-//            }
             case FRIEND_REQUEST: { // 好友请求
                 pthread_mutex_lock(&mutex_cli);
                 box->plz_account[box->friend_number] = recv_pack->data.send_account;
@@ -240,73 +126,6 @@ void *recv_pack_thread(void *sock_fd) { // 负责接收从服务端发回来的�
                 pthread_mutex_unlock(&mutex_cli);
                 break;
             }
-//            case DELETE_FRIEND: { // 删除好友
-//                memset(send_pack->data.respond, 0, sizeof(send_pack->data.respond));
-//                strcpy(send_pack->data.respond, recv_pack->data.respond);
-//                pthread_mutex_lock(&mutex_cli);
-//                pthread_cond_signal(&cond_cli);
-//                pthread_mutex_unlock(&mutex_cli);
-//                break;
-//            }
-//            case BLACKLIST_FRIEND: { // 黑名单
-//                memset(send_pack->data.respond, 0, sizeof(send_pack->data.respond));
-//                strcpy(send_pack->data.respond, recv_pack->data.respond);
-//                pthread_mutex_lock(&mutex_cli);
-//                pthread_cond_signal(&cond_cli);
-//                pthread_mutex_unlock(&mutex_cli);
-//                break;
-//            }
-//            case CANCEL_BLACKLIST: { // 取消黑名单
-//                memset(send_pack->data.respond, 0, sizeof(send_pack->data.respond));
-//                strcpy(send_pack->data.respond, recv_pack->data.respond);
-//                pthread_mutex_lock(&mutex_cli);
-//                pthread_cond_signal(&cond_cli);
-//                pthread_mutex_unlock(&mutex_cli);
-//                break;
-//            }
-//            case CONCERN_FRIEND: { // 特别关心
-//                memset(send_pack->data.respond, 0, sizeof(send_pack->data.respond));
-//                strcpy(send_pack->data.respond, recv_pack->data.respond);
-//                pthread_mutex_lock(&mutex_cli);
-//                pthread_cond_signal(&cond_cli);
-//                pthread_mutex_unlock(&mutex_cli);
-//                break;
-//            }
-//            case CANCEL_CONCERN_FRIEND: { // 取消特别关心
-//                memset(send_pack->data.respond, 0, sizeof(send_pack->data.respond));
-//                strcpy(send_pack->data.respond, recv_pack->data.respond);
-//                pthread_mutex_lock(&mutex_cli);
-//                pthread_cond_signal(&cond_cli);
-//                pthread_mutex_unlock(&mutex_cli);
-//                break;
-//            }
-//            case VIEW_FRIEND_LIST: { // 查看好友列表
-//                memset(send_pack->data.respond, 0, sizeof(send_pack->data.respond));
-//                strcpy(send_pack->data.respond, recv_pack->data.respond);
-//                memset(friend_list, 0, sizeof(FRIEND));
-//                Recv(*(int *) sock_fd, friend_list, sizeof(FRIEND), MSG_WAITALL);
-//
-//                pthread_mutex_lock(&mutex_cli);
-//                pthread_cond_signal(&cond_cli);
-//                pthread_mutex_unlock(&mutex_cli);
-//                break;
-//            }
-//            case SEND_FRIEND_MESSAGE: { // 发好友消息 send_friend_message
-//                memset(send_pack->data.respond, 0, sizeof(send_pack->data.respond));
-//                strcpy(send_pack->data.respond, recv_pack->data.respond);
-//                pthread_mutex_lock(&mutex_cli);
-//                pthread_cond_signal(&cond_cli);
-//                pthread_mutex_unlock(&mutex_cli);
-//                break;
-//            }
-//            case SEND_GROUP_MESSAGE: { // 发群消息
-//                memset(send_pack->data.respond, 0, sizeof(send_pack->data.respond));
-//                strcpy(send_pack->data.respond, recv_pack->data.respond);
-//                pthread_mutex_lock(&mutex_cli);
-//                pthread_cond_signal(&cond_cli);
-//                pthread_mutex_unlock(&mutex_cli);
-//                break;
-//            }
             case recv_group_messaage: { // 接受群消息
                 if (recv_pack->data.recv_account == send_pack->data.recv_account) {
                     printf("群号%d 群名%s 账号%d 昵称%s:\t%s\n", recv_pack->data.recv_account, recv_pack->data.recv_user,
@@ -333,13 +152,6 @@ void *recv_pack_thread(void *sock_fd) { // 负责接收从服务端发回来的�
                 }
                 break;
             }
-//            case VIEW_FRIEND_CHATMESSAGE: { // 查看消息记录
-//                pthread_mutex_lock(&mutex_cli);
-//                Recv(*(int *) sock_fd, message, sizeof(MESSAGE), MSG_WAITALL);
-//                pthread_cond_signal(&cond_cli);
-//                pthread_mutex_unlock(&mutex_cli);
-//                break;
-//            }
         }
     }
 }
