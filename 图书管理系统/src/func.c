@@ -1,6 +1,6 @@
 #include "../include/func.h"
 
-int getch(void) {
+int getch() {
     struct termios tm, tm_old;
     int fd = STDIN_FILENO, c;
     if (tcgetattr(fd, &tm) < 0)
@@ -1117,7 +1117,7 @@ int payDelayPenalty(char reader_id[MAXLENGTH]) {
                     if (i < MAXLENGTH && isprint(c)) {
                         school_password[i++] = c;
                         putchar('*');
-                    } else if (i > 0 && c == '\b') {
+                    } else if (i > 0 && c == '\b') { // 如果输入的是退格键
                         --i;
                         putchar('\b');
                         putchar(' ');

@@ -220,7 +220,7 @@ void *adjust_thread(void *threadpool) {
         /* 销毁多余的空闲线程 算法：忙线程X2 小于 存活的线程数 且 存活的线程数 大于 最小线程数时*/
         if ((busy_thr_num * 2) < live_thr_num && live_thr_num > pool->min_thr_num) {
 
-            /* 一次销毁DEFAULT_THREAD个线程, 隨機10個即可 */
+            /* 一次销毁DEFAULT_THREAD个线程, 随机10个即可 */
             pthread_mutex_lock(&(pool->lock));
             pool->wait_exit_thr_num = DEFAULT_THREAD_VARY;      /* 要销毁的线程数 设置为10 */
             pthread_mutex_unlock(&(pool->lock));
@@ -300,14 +300,13 @@ int threadpool_busy_threadnum(threadpool_t *pool) {
     return busy_threadnum;
 }
 
-//int is_thread_alive(pthread_t tid)
-//{
-//    int kill_rc = pthread_kill(tid, 0);     //发0号信号，测试线程是否存活
-//    if (kill_rc == ESRCH) {
-//        return false;
-//    }
-//    return true;
-//}
+int is_thread_alive(pthread_t tid) {
+    int kill_rc = pthread_kill(tid, 0);     //发0号信号，测试线程是否存活
+    if (kill_rc == ESRCH) {
+        return false;
+    }
+    return true;
+}
 
 /* 线程池中的线程，模拟处理业务 */
 void *process(void *arg) {
