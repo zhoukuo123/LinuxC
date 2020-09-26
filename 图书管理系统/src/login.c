@@ -268,7 +268,6 @@ int readerLogin() {
                 printf("\n\t\t\t请输入您的密码：");
                 char c = '\0';
                 int i = 0;
-//                initscr(); // getch()使用前的初始化
                 setbuf(stdin, NULL); // 清空缓冲区
                 while ((c = getch()) != '\r') { // '\r'是回车符'\n'是换行符 注意
                     // int isprint(int c) 在头文件ctype.h中
@@ -289,9 +288,8 @@ int readerLogin() {
 //                        putchar(' ');
 //                        putchar('\b');
 //                    }
-                }
-//                endwin(); // getch()使用后的注销
-                putchar('\n');
+
+                    putchar('\n');
                 login_password[i] = '\0';
 
                 while (row = mysql_fetch_row(result)) {
