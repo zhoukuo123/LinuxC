@@ -103,6 +103,7 @@ typedef struct user_data {
     int friend_request_num; // 好友请求数量
     int friend_chat_num;    // 好友私聊数量
     int group_request_num;  // 加群请求数量
+    int group_chat_num;
 
     char client_msg[50];    // 给客户端的一个空间
 
